@@ -9,11 +9,7 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "-isystem",
-                "C:\\projects\\libBuild\\Boost\\include\\boost-1_86",
-                "-L",
-                "C:\\projects\\libBuild\\Boost\\boost_build\\lib"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
                 "cwd": "${fileDirname}"
