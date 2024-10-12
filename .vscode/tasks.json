@@ -3,13 +3,18 @@
         {
             "type": "cppbuild",
             "label": "C/C++: g++.exe build active file",
-            "command": "C:\\Program Files\\msysw64\\ucrt64\\bin\\g++.exe",
+            "command": "C:\\Program Files\\msys\\ucrt64\\bin\\g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-isystem",
+                "F:\\lib\\boost\\include\\boost-1_86",
+                "-L",
+                "F:\\lib\\boost\\boost_build\\lib"
+
             ],
             "options": {
                 "cwd": "${fileDirname}"
