@@ -1,2 +1,8 @@
 /.vscode
 *.exe
+/.vscode
+/bin
+**/build
+**/out
+**/obj
+**/x64
