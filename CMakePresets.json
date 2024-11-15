@@ -1,27 +1,18 @@
 {
-    "version": 2,
+    "version": 8,
     "configurePresets": [
         {
-            "name": "vcpkg",
-            "displayName": "Visual Studio Community 2022 Release - amd64_x86",
-            "description": "Using compilers for Visual Studio 17 2022 (x64_x86 architecture)",
-            "generator": "Visual Studio 17 2022",
-            "toolset": "host=x64",
-            "architecture": "win32",
+            "name": "clang",
+            "displayName": "Clang 19.1.3 x86_64-pc-windows-msvc",
+            "description": "Using compilers: C = C:\\Program Files\\LLVM\\bin\\clang.exe, CXX = C:\\Program Files\\LLVM\\bin\\clang++.exe",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_C_COMPILER": "C:/Program Files/LLVM/bin/clang.exe",
+                "CMAKE_CXX_COMPILER": "C:/Program Files/LLVM/bin/clang++.exe",
+                "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             }
-        }
-    ],
-    "testPresets": [
-        {
-            "name": "Test",
-            "description": "",
-            "displayName": ""
         }
     ]
 }
