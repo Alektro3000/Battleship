@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
+#include "Players/PcPlayer.h"
 #include "DXApp.h"
+#include <windowsx.h>
 
 // the WindowProc function prototype
 // this is the main message handler for the program
@@ -26,7 +28,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    LPSTR lpCmdLine,
                    int nCmdShow)
 {
-    
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);\
+
     // the handle for the window, filled by a function
     HWND hWnd;
     // this struct holds information for the window class
@@ -46,14 +49,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // register the window class
     RegisterClassEx(&wc);
-    RECT wr = {0, 0, 800, 600};    // set the size, but not the position
+    RECT wr = {0, 0, 1920, 1080};    // set the size, but not the position
     AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);    // adjust the size
 
     // create the window and use the result as the handle
     hWnd = CreateWindowEx(NULL,
                           "WindowClass1",    // name of the window class
                           "Our Direct3D Program",   // title of the window
-                          WS_OVERLAPPEDWINDOW,    // window style
+                          WS_EX_TOPMOST | WS_POPUP, 
                           0,    // x-position of the window
                           0,    // y-position of the window
                           SCREEN_WIDTH, SCREEN_HEIGHT, 
@@ -62,12 +65,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
                           hInstance,    // application handle
                           NULL);    // used with multiple windows, NULL
 
+
+
     // display the window on the screen
     ShowWindow(hWnd, nCmdShow);
 
-    auto App = DXApp(hWnd);
     // enter the main loop:
-
+    DXApp App = DXApp(hWnd);
     // this struct holds Windows event messages
     MSG msg = {0};
 
@@ -86,6 +90,18 @@ int WINAPI WinMain(HINSTANCE hInstance,
             // check to see if it's time to quit
             if(msg.message == WM_QUIT)
                 break;
+            // check to see if it's time to quit
+            if(msg.message == WM_LBUTTONDOWN)
+            {
+                
+                D2D_SIZE_U pt;
+                pt.width = GET_X_LPARAM(msg.lParam);
+                pt.height = GET_Y_LPARAM(msg.lParam);
+                
+                App.OnClick(pt);
+            }
+            if(msg.message == WM_LBUTTONUP)
+                App.OnClickUp();
         }
         else
         {
