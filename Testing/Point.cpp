@@ -4,6 +4,21 @@
 
 #include "../Players/Player.h"
 
+TEST_CASE( "point", "[point]" ) {
+    CHECK( Point(2,2) + PointF(2.2,2.2) == PointF(4.2,4.2));
+    CHECK( PointF(2.2,2.2) + Point(2,2) == PointF(4.2,4.2));
+
+    CHECK( Point(2,2) * PointF(2.2,2.2) == PointF(4.4,4.4));
+    CHECK( PointF(2.2,2.2) * Point(2,2) == PointF(4.4,4.4));
+    
+    CHECK( PointF(2.2,2.2) / Point(2,2) == PointF(1.1,1.1));
+    CHECK( Point(2.2,2.2) / Point(2,2) == Point(1,1));
+
+    CHECK( PointF(2.2,2.2) / 2 == PointF(1.1,1.1));
+    CHECK( Point(2.2,2.2) / 2 == Point(1.1,1.1));
+}
+
+
 TEST_CASE( "saving", "[battleship]" ) {
     BattleShip ship{{1,2},3,Rotation::Left};
     CHECK(ship.getX() == 1);
@@ -59,4 +74,17 @@ TEST_CASE( "intersections", "[battleship]" ) {
     CHECK(ship.IntersectionPosition({5,0}) == -1);
     CHECK(ship.IntersectionPosition({-2,0}) == -1);
     CHECK(ship.IntersectionPosition({-1,0}) == -1);
+}
+
+
+TEST_CASE( "rects", "[battleship]" ) {
+    BattleShip ship = BattleShip{{0,0},5,Rotation::Right};
+    CHECK( (ship.getRect() == Rect{{0,0},{5,0}}));
+    BattleShip ship1 = BattleShip{{0,0},5,Rotation::Left};
+    BattleShip ship2 = BattleShip{{0,1},5,Rotation::Right};
+    auto rect = ship1.getRect() ;
+    CHECK( rect == Rect{{-5,0},{0,0}});
+    CHECK( ship.hasIntersection(ship1));
+    CHECK( !ship1.hasIntersection(ship2));
+    
 }

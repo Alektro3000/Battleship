@@ -1,22 +1,13 @@
 #include "Point.h"
-Point operator/ (Point left, int right)
+#include  <algorithm>
+
+Rect Rect::operator- (Rect left) const
 {
-    return Point(left.x/right,left.y/right);
+    return {low-left.low, high-left.high};
 }
 
-std::strong_ordering operator<=> (Point left, Point right)
+Rect Rect::operator& (Rect left) const
 {
-    if(left.x == right.x)
-        return left.y <=> right.y;
-    else
-        return left.x <=> right.x;
-}
-
-Point operator- (Point left, Point right)
-{
-    return Point(left.x-right.x, left.y-right.y);
-}
-Point operator- (Point left)
-{
-    return Point(-left.x, -left.y);
+    return Rect({std::max(low.x,left.low.x),std::max(low.y,left.low.y)}, 
+                {std::min(high.x,left.high.x),std::min(high.y,left.high.y)});
 }

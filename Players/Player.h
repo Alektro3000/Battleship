@@ -47,11 +47,20 @@ public:
     int getVariatin() { return unpackField(Data,4); };
 
     int IntersectionPosition(Point Point);
+    Rect getRect();
+    bool hasIntersection(BattleShip other);
 };
 struct GameRules
 {
     int getSizeX() {return 10;};
     int getSizeY() {return 10;};
+    int getShipAmount(int i) {return ShipSizes[i];};
+    int getMaxShipLength() {return ShipSizes.size();};
+    bool AllowedDiagonals() {return false;};
+    bool AllowedAdjacent() {return false;};
+private:
+
+    constexpr static std::array<char, 5> ShipSizes = {4,3,2,1,0};
 };
 
 struct IPlayer

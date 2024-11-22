@@ -93,12 +93,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
             // check to see if it's time to quit
             if(msg.message == WM_LBUTTONDOWN)
             {
-                
-                D2D_SIZE_U pt;
-                pt.width = GET_X_LPARAM(msg.lParam);
-                pt.height = GET_Y_LPARAM(msg.lParam);
-                
-                App.OnClick(pt);
+                App.OnClick({GET_X_LPARAM(msg.lParam),GET_Y_LPARAM(msg.lParam)});
             }
             if(msg.message == WM_LBUTTONUP)
                 App.OnClickUp();

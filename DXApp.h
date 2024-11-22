@@ -8,6 +8,17 @@
 
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
+
+inline  PointF MakePointF(D2D1_SIZE_F p)
+{
+    return {p.width, p.height};
+}
+inline PointF MakePointF(D2D1_SIZE_U p)
+{
+    return PointF{static_cast<float>(p.width), static_cast<float>(p.height)};
+}
+
+
 class DXApp
 {
 
@@ -17,6 +28,8 @@ public:
     ID2D1SolidColorBrush *pBlackBrush = nullptr;
     ID2D1SolidColorBrush *pRedBrush = nullptr;
     RECT rc;
+    int size = 30;
+    PointF Scaling;
 
     DXApp() {};
     // Constructor
@@ -44,6 +57,9 @@ public:
         pRT->CreateSolidColorBrush(
             D2D1::ColorF(D2D1::ColorF::Red),
             &pRedBrush);
+        auto a = MakePointF(pRT->GetSize());
+        auto b = MakePointF(pRT->GetPixelSize());
+        Scaling =  a / b;
     }
 
     ~DXApp()
@@ -70,10 +86,10 @@ public:
     std::set<Point> points;
     void OnClick(Point Point)
     {
-        if(!points.contains(Point/40))
-            points.insert(Point/40);
+        if(!points.contains(Point*Scaling /30))
+            points.insert(Point*Scaling/30);
         else
-            points.erase(Point/40);
+            points.erase(Point*Scaling/30);
     };
     void OnClickUp() {
     };
@@ -91,8 +107,8 @@ public:
         {
             POINT p;
             GetCursorPos(&p);
-            int i = p.x / 40;
-            int j = p.y / 40;
+            int i = p.x * Scaling.x / 30;
+            int j = p.y * Scaling.y / 30;
             pRT->FillRectangle(
                 D2D1::RectF(
                     i * 30,
