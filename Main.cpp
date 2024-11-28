@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "Players/PcPlayer.h"
+#include "Screen/BattleApp.h"
 #include "DXApp.h"
 #include <windowsx.h>
 
@@ -28,7 +29,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    LPSTR lpCmdLine,
                    int nCmdShow)
 {
-    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);\
 
     // the handle for the window, filled by a function
     HWND hWnd;
@@ -59,7 +59,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
                           WS_EX_TOPMOST | WS_POPUP, 
                           0,    // x-position of the window
                           0,    // y-position of the window
-                          SCREEN_WIDTH, SCREEN_HEIGHT, 
+                          GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 
                           NULL,    // we have no parent window, NULL
                           NULL,    // we aren't using menus, NULL
                           hInstance,    // application handle
@@ -71,7 +71,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
     ShowWindow(hWnd, nCmdShow);
 
     // enter the main loop:
-    DXApp App = DXApp(hWnd);
+    DXApp App(hWnd);
+    App.changeScreen(std::make_unique<BattleApp>(GameRules(),std::make_unique<PCPlayer>(GameRules())));
     // this struct holds Windows event messages
     MSG msg = {0};
 
@@ -92,18 +93,20 @@ int WINAPI WinMain(HINSTANCE hInstance,
                 break;
             // check to see if it's time to quit
             if(msg.message == WM_LBUTTONDOWN)
-            {
-                App.OnClick({GET_X_LPARAM(msg.lParam),GET_Y_LPARAM(msg.lParam)});
-            }
+                App.onWinClick(POINT{GET_X_LPARAM(msg.lParam),GET_Y_LPARAM(msg.lParam)}, Button::left);
             if(msg.message == WM_LBUTTONUP)
-                App.OnClickUp();
+                App.onWinClickUp(Button::left);
+            if(msg.message == WM_RBUTTONDOWN)
+                App.onWinClick(POINT{GET_X_LPARAM(msg.lParam),GET_Y_LPARAM(msg.lParam)}, Button::right);
+            if(msg.message == WM_RBUTTONUP)
+                App.onWinClickUp(Button::right);
         }
         else
         {
-            App.RenderFrame();
+            App.renderFrame();
         }
     }
 
     // return this part of the WM_QUIT message to Windows
     return msg.wParam;
-}
+};

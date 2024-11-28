@@ -4,18 +4,18 @@
 
 #include "../Players/Player.h"
 
-TEST_CASE( "point", "[point]" ) {
-    CHECK( Point(2,2) + PointF(2.2,2.2) == PointF(4.2,4.2));
-    CHECK( PointF(2.2,2.2) + Point(2,2) == PointF(4.2,4.2));
+TEST_CASE( "PointI", "[PointI]" ) {
+    CHECK( PointI(2,2) + PointF(2.2,2.2) == PointF(4.2,4.2));
+    CHECK( PointF(2.2,2.2) + PointI(2,2) == PointF(4.2,4.2));
 
-    CHECK( Point(2,2) * PointF(2.2,2.2) == PointF(4.4,4.4));
-    CHECK( PointF(2.2,2.2) * Point(2,2) == PointF(4.4,4.4));
+    CHECK( PointI(2,2) * PointF(2.2,2.2) == PointF(4.4,4.4));
+    CHECK( PointF(2.2,2.2) * PointI(2,2) == PointF(4.4,4.4));
     
-    CHECK( PointF(2.2,2.2) / Point(2,2) == PointF(1.1,1.1));
-    CHECK( Point(2.2,2.2) / Point(2,2) == Point(1,1));
+    CHECK( PointF(2.2,2.2) / PointI(2,2) == PointF(1.1,1.1));
+    CHECK( PointI(2.2,2.2) / PointI(2,2) == PointI(1,1));
 
     CHECK( PointF(2.2,2.2) / 2 == PointF(1.1,1.1));
-    CHECK( Point(2.2,2.2) / 2 == Point(1.1,1.1));
+    CHECK( PointI(2.2,2.2) / 2 == PointI(1.1,1.1));
 }
 
 
@@ -25,6 +25,7 @@ TEST_CASE( "saving", "[battleship]" ) {
     CHECK(ship.getY() == 2);
     CHECK(ship.getLength() == 3);
     CHECK(ship.getRotation() == Rotation::Left);
+    CHECK(sizeof(BattleShip) == 4);
 }
 
 
@@ -79,12 +80,23 @@ TEST_CASE( "intersections", "[battleship]" ) {
 
 TEST_CASE( "rects", "[battleship]" ) {
     BattleShip ship = BattleShip{{0,0},5,Rotation::Right};
-    CHECK( (ship.getRect() == Rect{{0,0},{5,0}}));
+    CHECK( (ship.getRect() == RectI{{0,0},{4,0}}));
     BattleShip ship1 = BattleShip{{0,0},5,Rotation::Left};
-    BattleShip ship2 = BattleShip{{0,1},5,Rotation::Right};
+    BattleShip ship2 = BattleShip{{1,0},5,Rotation::Right};
     auto rect = ship1.getRect() ;
-    CHECK( rect == Rect{{-5,0},{0,0}});
+    CHECK( rect == RectI{{-4,0},{0,0}});
     CHECK( ship.hasIntersection(ship1));
     CHECK( !ship1.hasIntersection(ship2));
-    
+    CHECK( ship1.hasIntersectionCorner(ship2));
+    CHECK( ship.hasIntersection(ship2));
+
+    SECTION("ADJ + Corner")
+    {
+        CHECK( !ship.hasIntersection(PointI{0,1}));
+        CHECK( !ship.hasIntersection(PointI{1,1}));
+        CHECK( ship.hasIntersectionAdj(PointI{0,1}));
+        CHECK( ship.hasIntersectionAdj(PointI{1,1}));
+        CHECK( !ship.hasIntersectionAdj(PointI{5,1}));
+        CHECK( ship.hasIntersectionCorner(PointI{5,1}));
+    }
 }

@@ -1,40 +1,48 @@
 
 #include "Player.h"
-BattleShip::BattleShip(Point begin, int length, Rotation rotation, int variation)
+#include <cassert>
+
+BattleShip::BattleShip(PointI begin, int length, Rotation rotation, int variation)
 {
-    Data = 0;
-    Data |= packField(begin.x, 0);
-    Data |= packField(begin.y, 1);
-    Data |= packField(length, 2);
-    Data |= packField((int)rotation, 3);
-    Data |= packField(variation, 4);
+    x = begin.x;
+    y = begin.y;
+    len = length;
+    rot = (unsigned int)rotation;
+    var = variation;
 }
 
-int BattleShip::IntersectionPosition(Point point)
+int BattleShip::IntersectionPosition(PointI point)
 {
-    int rot = static_cast<int>(getRotation());
-    auto P = (rot > 1) ? (this->getPoint() - point) : (point - this->getPoint());
-    rot &= 1;
-    auto length = rot == 0 ? P.y : P.x;
-    auto width = rot == 0 ? P.x : P.y;
+    auto P = (point - getPoint()).rotated(getRotation());
     auto shipLength = getLength();
-    return (length >= 0 && length < shipLength && width == 0) ? length : -1;
+    return (P.x >= 0 && P.x < shipLength && P.y == 0) ? P.x : -1;
 }
-Rect BattleShip::getRect()
+RectI BattleShip::getRect()
 {
-    Point low = getPoint();
-    int rot = static_cast<int>(getRotation());
-    auto P = getPoint();
-    int len = (rot > 1) ? -getLength() : getLength();
-    rot &= 1;
-    Point high = low + Point(rot == 1 ? len : 0, rot != 1 ? len : 0);
-    
-    return len > 0 ? Rect(low,high) : Rect(high,low);  
+    PointI low = getPoint();
+    auto P = (PointI{getLength()-1,0}).rotated(getRotation());
+    return Rect {low,low + P}.normalized();  
 }
 
 bool BattleShip::hasIntersection(BattleShip other)
 {
-    auto diff = getRect()&other.getRect();
+    auto a = getRect();
+    auto b = other.getRect();
+    auto diff = (a&b).size();
 
-    return diff <= Rect{{0,0},{0,0}};  
+    return diff.x >= 0 && diff.y >= 0;  
+}
+
+bool BattleShip::hasIntersectionAdj(BattleShip other)
+{
+    auto diff = (getRect()&other.getRect()).size();
+
+    return  diff.y >= 0 && diff.x >= -1 || diff.x >= 0 && diff.y >= -1;  
+}
+
+bool BattleShip::hasIntersectionCorner(BattleShip other)
+{
+    auto diff = (getRect()&other.getRect()).size();
+    auto fl = diff.x >= -1 && diff.y >= -1;
+    return fl;  
 }

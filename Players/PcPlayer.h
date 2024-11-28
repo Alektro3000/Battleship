@@ -1,22 +1,16 @@
 #include "Player.h"
 
-struct PCPlayer : IPlayer
+struct PCPlayer : Player
 {
     GameRules _rules;
     std::vector<BattleShip> Ship;
     std::vector<int> ShipHits;
-    void Init(GameRules rules) override
+    PCPlayer(GameRules rules)
     {
         _rules = rules;
         BuildShipLocations();
     }
-    void SetBeginPosition(std::vector<BattleShip> Ships) override
-    {
-        Ship = Ships;
-        std::fill(ShipHits.begin(),ShipHits.end(),0);
-        ShipHits.resize(Ship.size(),0);
-    }
-    Results MakeMove(Point x) override
+    Results MakeMove(PointI x) override
     {
         auto q = std::find_if(Ship.begin(),Ship.end(), 
                 [x](BattleShip y) {return y.IntersectionPosition(x) != -1;});
@@ -25,6 +19,10 @@ struct PCPlayer : IPlayer
         auto n = Ship.begin() - q;
         ShipHits[n]++;
         return ShipHits[n] == q->getLength() ? Results::Destroy : Results::Hit;
+    }
+    virtual std::vector<BattleShip> ShowShips() override
+    {
+        return Ship;
     }
     void BuildShipLocations()
     {

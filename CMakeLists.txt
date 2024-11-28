@@ -10,7 +10,8 @@ find_package(Catch2 3 REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(BaseCpps Point.cpp Players/Player.cpp Players/PcPlayer.cpp DXApp.cpp)
+set(BaseCpps Point.cpp Players/Player.cpp Players/PcPlayer.cpp DXApp.cpp Screen/BattleApp.cpp 
+Visual/Grid.cpp Visual/Base.cpp Visual/BattleGrid.cpp Visual/BeginGrid.cpp) 
 
 add_executable(main WIN32 Main.cpp ${BaseCpps})
 

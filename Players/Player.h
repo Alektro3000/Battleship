@@ -14,63 +14,51 @@ enum class Results
     Destroy
 };
 
-enum class Rotation : int
-{
-    Up = 0,
-    Right = 1,
-    Down = 2,
-    Left = 3
-};
-
 struct BattleShip
 {
 private:
-    int Data;
-
-    constexpr static std::array<char, 5> FieldSizes = {10,10,6,2,4};
-    constexpr static std::array<char, 5> FieldOffsets = {0,10,20,26,28};
-    int packField(int val, int id)
-    {
-        return (val & ((1 << FieldSizes[id]) - 1)) << FieldOffsets[id];
-    }
-    int unpackField(int val, int id)
-    {
-        return (val >> FieldOffsets[id])  & ((1 << FieldSizes[id]) - 1);
-    }
+    int x : 10,
+     y : 10;
+    unsigned len : 6,
+     rot : 2,
+     var : 4;
 public:
-    BattleShip(Point begin, int length, Rotation rotation, int variation = 0);
-    int getX() { return unpackField(Data,0); };
-    int getY() { return unpackField(Data,1);  };
-    Point getPoint() { return {getX(), getY()};  };
-    int getLength() { return unpackField(Data,2);  };
-    Rotation getRotation() { return (Rotation)unpackField(Data,3); };
-    int getVariatin() { return unpackField(Data,4); };
+    constexpr auto operator<=>(const BattleShip &left) const = default;
 
-    int IntersectionPosition(Point Point);
-    Rect getRect();
+     BattleShip(): BattleShip({0,0},0) {};
+    BattleShip(PointI begin, int length = 1, Rotation rotation = Rotation::Right, int variation = 0);
+    int getX() const { return x; };
+    int getY() const { return y;  };
+    PointI getPoint() const { return {getX(), getY()};  };
+    int getLength() const { return len;  };
+    Rotation getRotation() const { return (Rotation)rot; };
+    int getVariatin() const  { return var; };
+    void setPoint(PointI newStart) { x=newStart.x; y = newStart.y; };
+    void setRotation(Rotation newRotation) { rot = (int)newRotation; };
+
+    int IntersectionPosition(PointI PointI);
+    RectI getRect();
     bool hasIntersection(BattleShip other);
+    bool hasIntersectionAdj(BattleShip other);
+    bool hasIntersectionCorner(BattleShip other);
 };
 struct GameRules
 {
-    int getSizeX() {return 10;};
-    int getSizeY() {return 10;};
-    int getShipAmount(int i) {return ShipSizes[i];};
-    int getMaxShipLength() {return ShipSizes.size();};
-    bool AllowedDiagonals() {return false;};
-    bool AllowedAdjacent() {return false;};
+    constexpr PointI getSize() {return {10,10};};
+    constexpr int getShipAmount(int i) {return ShipsAmounts[i];};
+    constexpr int getMaxShipLength() {return ShipsAmounts.size();};
+    constexpr bool AllowedDiagonals() {return false;};
+    constexpr bool AllowedAdjacent() {return false;};
 private:
-
-    constexpr static std::array<char, 5> ShipSizes = {4,3,2,1,0};
+    constexpr static std::array<char, 5> ShipsAmounts = {4,3,2,1};
 };
 
-struct IPlayer
+struct Player
 {
-    virtual std::unique_ptr<IPlayer> copy() const = 0;
-    virtual ~IPlayer() = default;
+    virtual ~Player() = default;
 
-    virtual void Init(GameRules rules) = 0;
-    virtual void SetBeginPosition(std::vector<BattleShip> Ships) = 0;
-    virtual Results MakeMove(Point x) = 0;
+    virtual std::vector<BattleShip> ShowShips() = 0;
+    virtual Results MakeMove(PointI x) = 0;
 };
 
 #endif
