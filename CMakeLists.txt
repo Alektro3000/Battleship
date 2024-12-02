@@ -10,21 +10,26 @@ find_package(Catch2 3 REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(BaseCpps Point.cpp Players/Player.cpp Players/PcPlayer.cpp DXApp.cpp Screen/BattleApp.cpp 
-Visual/Grid.cpp Visual/Base.cpp Visual/BattleGrid.cpp Visual/BeginGrid.cpp) 
+
+set(BattleCpps BattleScreen.cpp SelectScreen.cpp Grids/BattleGrid.cpp Grids/BeginGrid.cpp Grids/Grid.cpp)
+list(TRANSFORM BattleCpps PREPEND "Battle/")
+
+set(VisualCpps Base.cpp Menu.cpp Net/MakeServer.cpp ${BattleCpps}) 
+list(TRANSFORM VisualCpps PREPEND "Screen/")
+set(BaseCpps Players/Player.cpp Players/PcPlayer.cpp DXApp.cpp ${VisualCpps}) 
 
 add_executable(main WIN32 Main.cpp ${BaseCpps})
 
-target_link_libraries(main PRIVATE 
-d3d11.lib dxgi.lib dxguid.lib uuid.lib
-kernel32.lib user32.lib d3dcompiler.lib d2d1.lib
-comdlg32.lib advapi32.lib shell32.lib
-ole32.lib oleaut32.lib Microsoft::DirectXTK )
+target_link_libraries(main PRIVATE d2d1.lib dwrite.lib)
 
 include_directories(asio ${Boost_INCLUDE_DIRS})
 add_executable(net Asio.cpp)
+add_executable(net2 AsioServer.cpp)
 
 target_link_libraries(net ${Boost_LIBRARIES})
+target_link_libraries(net iphlpapi ws2_32)
+target_link_libraries(net2 ${Boost_LIBRARIES})
+target_link_libraries(net2 iphlpapi ws2_32)
 
 
 add_executable(tests Testing/Point.cpp ${BaseCpps})

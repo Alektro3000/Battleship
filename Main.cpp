@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include "Players/PcPlayer.h"
-#include "Screen/BattleApp.h"
+#include "Screen/Menu.h"
 #include "DXApp.h"
 #include <windowsx.h>
 
@@ -30,6 +30,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    int nCmdShow)
 {
 
+    std::srand(std::time(nullptr));
     // the handle for the window, filled by a function
     HWND hWnd;
     // this struct holds information for the window class
@@ -72,7 +73,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // enter the main loop:
     DXApp App(hWnd);
-    App.changeScreen(std::make_unique<BattleApp>(GameRules(),std::make_unique<PCPlayer>(GameRules())));
+    App.changeScreen(std::make_unique<MenuScreen>());
     // this struct holds Windows event messages
     MSG msg = {0};
 
@@ -100,6 +101,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
                 App.onWinClick(POINT{GET_X_LPARAM(msg.lParam),GET_Y_LPARAM(msg.lParam)}, Button::right);
             if(msg.message == WM_RBUTTONUP)
                 App.onWinClickUp(Button::right);
+            if(msg.message == WM_CHAR )
+                App.onWinChar(static_cast<wchar_t>('0' + LOWORD(msg.wParam) - 100));
         }
         else
         {

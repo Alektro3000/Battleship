@@ -5,7 +5,8 @@
 #include <algorithm>
 #include <compare>
 #include <stdexcept>
-#include "../Visual/Base.h"
+#include "Base.h"
+#include <functional>
 
 
 #ifndef ScreenH
@@ -24,24 +25,47 @@ protected:
         POINT p;
         if(!GetCursorPos(&p))
             throw std::runtime_error("error getting cursor");
-        return makePointF(p) * scaling;
+        return makePointF(p) *  makePointF(render.RenderTarget->GetSize())/ makePointF(render.RenderTarget->GetPixelSize());
     }
-    PointF size;
-    PointF scaling;
-    ID2D1HwndRenderTarget *pRT;
+    RectF position;
+    RenderThings render;
+    using callback = std::function<void(std::unique_ptr<Screen>)>;
+    callback changeScreenCallback;
 public:
-    virtual void onResize()  {
-        size = makePointF(pRT->GetSize());
-        auto b = makePointF(pRT->GetPixelSize());
-        scaling = size / b;
-        };
+    RectF getPosition()
+    {
+        return position;
+    }
+
+    void changeScreenSetup(callback func)
+    {
+        changeScreenCallback = std::move(func);
+    }
+    virtual void onResize(RectF newSize)  {position = newSize; };
     virtual void onRender()  { };
     virtual void onClick(Button button) {};
-    virtual void onClickUp(Button button) {};
-    void Init(ID2D1HwndRenderTarget *npRT)
+    bool tryClick(Button button, PointF point)
     {
-        pRT = npRT;
+        if(position.isPointInsideExcl(point))
+        {
+            onClick(button);
+            return true;
+        }
+        return false;
     }
+    virtual void onClickUp(Button button) {};
+    virtual void onChar(WCHAR letter) {};
+    bool tryClickUp(Button button, PointF point)
+    {
+        if(position.isPointInsideExcl(point))
+        {
+            onClickUp(button);
+            return true;
+        }
+        return false;
+    }
+    virtual void init(RenderThings npRT) {render = npRT;};
+    
     virtual ~Screen(){};
 
 };
