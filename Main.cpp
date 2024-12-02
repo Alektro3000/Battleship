@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 #include "Players/PcPlayer.h"
 #include "Screen/Menu.h"
@@ -34,29 +33,29 @@ int WINAPI WinMain(HINSTANCE hInstance,
     // the handle for the window, filled by a function
     HWND hWnd;
     // this struct holds information for the window class
-    WNDCLASSEX wc;
+    WNDCLASSEXW wc;
 
     // clear out the window class for use
-    ZeroMemory(&wc, sizeof(WNDCLASSEX));
+    ZeroMemory(&wc, sizeof(WNDCLASSEXW));
 
     // fill in the struct with the needed information
-    wc.cbSize = sizeof(WNDCLASSEX);
+    wc.cbSize = sizeof(WNDCLASSEXW);
     wc.style = CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     //wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
-    wc.lpszClassName = "WindowClass1";
+    wc.lpszClassName = L"WindowClass1";
 
     // register the window class
-    RegisterClassEx(&wc);
+    RegisterClassExW(&wc);
     RECT wr = {0, 0, 1920, 1080};    // set the size, but not the position
     AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);    // adjust the size
 
     // create the window and use the result as the handle
-    hWnd = CreateWindowEx(NULL,
-                          "WindowClass1",    // name of the window class
-                          "Our Direct3D Program",   // title of the window
+    hWnd = CreateWindowExW(NULL,
+                          L"WindowClass1",    // name of the window class
+                          L"Our Direct3D Program",   // title of the window
                           WS_EX_TOPMOST | WS_POPUP, 
                           0,    // x-position of the window
                           0,    // y-position of the window
@@ -102,7 +101,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
             if(msg.message == WM_RBUTTONUP)
                 App.onWinClickUp(Button::right);
             if(msg.message == WM_CHAR )
-                App.onWinChar(static_cast<wchar_t>('0' + LOWORD(msg.wParam) - 100));
+                App.onWinChar(static_cast<wchar_t>(LOWORD(msg.wParam)));
         }
         else
         {

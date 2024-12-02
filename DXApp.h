@@ -1,12 +1,9 @@
-#include <d2d1.h>
-#include <d2d1helper.h>
-#include <dwrite.h>
+#include "Screen/Screen.h"
 #include <vector>
 #include <set>
 #include <algorithm>
 #include <compare>
 #include <stdexcept>
-#include "Screen/Screen.h"
 
 #ifndef DXAppH
 #define DXAppH

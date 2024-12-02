@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(BattleCpps BattleScreen.cpp SelectScreen.cpp Grids/BattleGrid.cpp Grids/BeginGrid.cpp Grids/Grid.cpp)
 list(TRANSFORM BattleCpps PREPEND "Battle/")
 
-set(VisualCpps Base.cpp Menu.cpp Net/MakeServer.cpp ${BattleCpps}) 
+set(VisualCpps Base.cpp Menu.cpp Net/MakeServer.cpp Net/ListServer.cpp Base/Button.cpp Base/TextBox.cpp  Base/TextEditable.cpp ${BattleCpps}) 
 list(TRANSFORM VisualCpps PREPEND "Screen/")
 set(BaseCpps Players/Player.cpp Players/PcPlayer.cpp DXApp.cpp ${VisualCpps}) 
 

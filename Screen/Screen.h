@@ -1,11 +1,9 @@
-#include <d2d1.h>
-#include <d2d1helper.h>
+#include "Base.h"
 #include <vector>
 #include <set>
 #include <algorithm>
 #include <compare>
 #include <stdexcept>
-#include "Base.h"
 #include <functional>
 
 
@@ -44,9 +42,9 @@ public:
     virtual void onResize(RectF newSize)  {position = newSize; };
     virtual void onRender()  { };
     virtual void onClick(Button button) {};
-    bool tryClick(Button button, PointF point)
+    bool tryClick(Button button)
     {
-        if(position.isPointInsideExcl(point))
+        if(position.isPointInsideExcl(getCursor()))
         {
             onClick(button);
             return true;
@@ -55,9 +53,9 @@ public:
     }
     virtual void onClickUp(Button button) {};
     virtual void onChar(WCHAR letter) {};
-    bool tryClickUp(Button button, PointF point)
+    bool tryClickUp(Button button)
     {
-        if(position.isPointInsideExcl(point))
+        if(position.isPointInsideExcl(getCursor()))
         {
             onClickUp(button);
             return true;

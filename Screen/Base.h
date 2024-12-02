@@ -1,6 +1,6 @@
-
-#include <d2d1.h>
+#define UNICODE
 #include <dwrite.h>
+#include <d2d1.h>
 #include <utility>
 #include <wincodec.h> 
 #include <comdef.h>
@@ -47,7 +47,7 @@ struct SolidBrush
         std::swap(other.brush,brush);
         return *this;
     };
-    operator ID2D1SolidColorBrush*()
+    operator ID2D1SolidColorBrush*() const
     {
         return brush;
     }

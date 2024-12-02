@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <d2d1.h>
 
-void VisualGrid::DrawShip(BattleShip ship, RectF position)
+void VisualGrid::DrawShip(BattleShip ship, RectF position) const
 {
         render.RenderTarget->FillRectangle(
             makeD2DRectF(position),
@@ -28,17 +28,17 @@ PointI VisualGrid::getSize() const
 {
         return size;
 }
-RectF VisualGrid::GetShipSnapped(BattleShip ship)
+RectF VisualGrid::GetShipSnapped(BattleShip ship) const
 {
         return GetShipRect(ship) + getGridPos().low;
 }
-RectF VisualGrid::GetShipRect(BattleShip ship)
+RectF VisualGrid::GetShipRect(BattleShip ship) const
 {
         RectF ans = RectF(ship.getRect()) / size * getGridPos().size();
         ans.high = ans.high + getGridPos().size() / size;
         return ans;
 }
-bool VisualGrid::IsPointIntersect(PointF point, BattleShip ship)
+bool VisualGrid::IsPointIntersect(PointF point, BattleShip ship) const
 {
         return GetShipSnapped(ship).isPointInside(point);
 }

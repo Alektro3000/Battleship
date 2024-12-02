@@ -12,6 +12,12 @@ std::string make_daytime_string()
   return ctime(&now);
 }
 
+
+struct Response
+{
+  std::array<wchar_t, 32> name;
+  int len;
+};
 using boost::asio::ip::udp;
 using boost::asio::ip::tcp;
 
@@ -100,19 +106,23 @@ std::vector<std::string> queryServers(boost::asio::io_service& io_service, netIp
 
     socket.send_to(boost::asio::buffer(make_daytime_string()), senderEndpoint);
 
-    char reply[20];
+    Response reply[1];
     boost::system::error_code error;
     udp::endpoint responseEndpoint(boost::asio::ip::address_v4::any(),3190);
     std::vector<std::string> ip_addresses;
 
     while (true) {
-        size_t len = socket.receive_from(boost::asio::buffer(reply), responseEndpoint, 0, error);
+        size_t len = socket.async_receive_from(boost::asio::buffer(reply), responseEndpoint,
+          boost::bind(&handle_receive, this, boost::asio::placeholders::error, 
+          boost::asio::placeholders::bytes_transferred));
         if (error == boost::asio::error::would_block || error == boost::asio::error::message_size) {
             break; // Stop receiving if no more responses or buffer overflow
         } else if (!error) {
             std::string ip = responseEndpoint.address().to_string();
             ip_addresses.push_back(ip);
             std::cout << "Received reply from " << ip << std::endl;
+            std::cout << "Reply: ";
+            std::wcout << std::wstring{reply->name.begin(),reply->name.begin()+reply->len} << std::endl;
         }
     }
     return ip_addresses;

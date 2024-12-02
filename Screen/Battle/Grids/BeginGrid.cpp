@@ -21,7 +21,7 @@ VisualBeginGrid::VisualBeginGrid(GameRules rules) : VisualGrid({10, 3})
     }
 };
 
-std::optional<BattleShip> VisualBeginGrid::getIntersectionShipCoord(PointI point)
+std::optional<BattleShip> VisualBeginGrid::getIntersectionShipCoord(PointI point) const
 {
     auto ship = std::find_if(ships.begin(), ships.end(), [point, this](auto ship)
                              { return (ship.first.IntersectionPosition(point) != -1) && ship.second > 0; });
@@ -62,7 +62,7 @@ void VisualBeginGrid::onRender()
                 );
     }
 }
-bool VisualBeginGrid::canShipBeAdded(BattleShip shipCopy)
+bool VisualBeginGrid::canShipBeAdded(BattleShip shipCopy) const
 {
     return true;
 }

@@ -2,7 +2,7 @@
 #include <d2d1.h>
 #include <algorithm>
 
-std::optional<BattleShip> VisualBattleGrid::getIntersectionShipCoord(PointI point) 
+std::optional<BattleShip> VisualBattleGrid::getIntersectionShipCoord(PointI point) const
 {
     auto ship = std::find_if(ships.begin(), ships.end(), [point, this](BattleShip ship)
                              { return ship.IntersectionPosition(point) != -1; });
@@ -18,8 +18,8 @@ void VisualBattleGrid::addShip(BattleShip ship)
 {
     ships.push_back(ship);
 }
-bool VisualBattleGrid::canShipBeAdded(BattleShip shipCopy)
-{
+bool VisualBattleGrid::canShipBeAdded(BattleShip shipCopy) const
+{ 
     auto isValid = isShipInsideGrid(shipCopy);
     isValid = isValid && std::all_of(ships.begin(), ships.end(), [shipCopy, this](BattleShip ship)
                                      { return !ship.hasIntersectionCorner(shipCopy); });

@@ -1,36 +1,34 @@
 #include "Menu.h"
+#include "Battle/SelectScreen.h"
+#include "Net/ListServer.h"
 #include "../Players/PcPlayer.h"
+
+MenuScreen::MenuScreen()
+{
+    PcButton = std::make_unique<ButtonScreen>(
+        std::make_unique<TextBox>(L"Начать игру с ПК", 40, D2D1::ColorF(D2D1::ColorF::Black)), [this](auto _)
+                                  { changeScreenCallback(std::make_unique<SelectScreen>(GameRules(),
+                                                                                        std::make_unique<PCPlayer>(GameRules()))); });
+
+    NetButton = std::make_unique<ButtonScreen>(
+        std::make_unique<TextBox>(L"Начать игру по сети", 40, D2D1::ColorF(D2D1::ColorF::Black)), [this](auto _)
+                                  { changeScreenCallback(std::make_unique<ListScreen>()); });
+}
 
 void MenuScreen::onClick(Button button)
 {
-    if(PcBegin.scaled(position).isPointInsideExcl(getCursor()))
-    {
-        changeScreenCallback(std::make_unique<SelectScreen>(GameRules(),
-                std::make_unique<PCPlayer>(GameRules())));
-        return;
-    }
-    if(NetBegin.scaled(position).isPointInsideExcl(getCursor()))
-    {
-        
-        return;
-    }
+    PcButton->tryClick(button) || NetButton->tryClick(button);
 }
 void MenuScreen::onResize(RectF newSize)
 {
     Screen::onResize(newSize);
+    PcButton->onResize(PcBegin.scaled(newSize));
+    NetButton->onResize(NetBegin.scaled(newSize));
 }
 void MenuScreen::onRender()
 {
     Screen::onRender();
     render.RenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
-
-    RectF pos = PcBegin.scaled(position);
-    render.RenderTarget->DrawRectangle(makeD2DRectF(pos),brush);
-    render.RenderTarget->DrawText(L"Начать игру с ПК", 17, format, makeD2DRectF(pos), brush);
-
-    
-    pos = NetBegin.scaled(position);
-    render.RenderTarget->DrawRectangle(makeD2DRectF(pos),brush);
-    render.RenderTarget->DrawText(L"Начать игру по сети", 20, format, makeD2DRectF(pos), brush);
-
+    PcButton->onRender();
+    NetButton->onRender();
 }

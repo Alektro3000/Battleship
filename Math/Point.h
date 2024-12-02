@@ -5,6 +5,10 @@
 #ifndef PointH
 #define PointH
 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 struct Rotation
 {
     enum Value : char
@@ -113,6 +117,12 @@ struct Point
                 return {-y,x};
         }
         return {y,x};
+        
+    };
+    constexpr Point<int> sgn() const
+        requires requires(T a) { ::sgn(a); }
+    {
+        return {::sgn(x),::sgn(y)};
         
     };
 };

@@ -22,6 +22,8 @@ class BattleScreen : public Screen
     std::unique_ptr<VisualBattleGrid> gridPlayer;
     std::unique_ptr<VisualBattleGrid> gridOpponent;
 
+    std::vector<int> shipHits;
+
     PointF gridSize;
     ID2D1SolidColorBrush *grayBrush = nullptr;
 
@@ -35,10 +37,17 @@ public:
                                              gridPlayer(std::move(gridPlayer)),
                                              gridOpponent(std::move(gridOpponent)),
                                              opponentShots(nRules.getSize().x * nRules.getSize().y),
-                                             playerShots(nRules.getSize().x * nRules.getSize().y) {
-                                                 
+                                             playerShots(nRules.getSize().x * nRules.getSize().y),
+                                             shipHits(nRules.getTotalShipAmount()) {
+                                                 if(!isPlayerTurn)
+                                                 {
+                                                    makingMove = std::jthread([this](){
+                                                        getMove();
+                                                    });
+                                                 }
                                              };
 
+    void getMove();
     void onClick(Button button) override;
     void onClickUp(Button button) override;
     void onResize(RectF newSize) override;

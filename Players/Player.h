@@ -3,6 +3,7 @@
 #include <bitset>
 #include <vector>
 #include <array>
+#include <numeric>
 #include "../Math/Rect.h"
 #ifndef PlayerH
 #define PlayerH
@@ -18,13 +19,13 @@ struct GameRules
 {
     constexpr PointI getSize() {return {10,10};};
     constexpr int getShipAmount(int i) {return ShipsAmounts[i-1];};
+    constexpr int getTotalShipAmount() {return std::accumulate(ShipsAmounts.begin(),ShipsAmounts.end(),0);};
     constexpr int getMaxShipLength() {return ShipsAmounts.size();};
     constexpr bool AllowedDiagonals() {return false;};
-    constexpr bool AllowedAdjacent() {return false;};
     constexpr int flatIndex(PointI pos) {return pos.x * getSize().y + pos.y;};
     constexpr bool isValidIndex(PointI pos) {return RectI{0,getSize()}.isPointInsideExcl(pos);};
 private:
-    constexpr static std::array<char, 5> ShipsAmounts = {0,0,0,1,0};
+    constexpr static std::array<char, 5> ShipsAmounts = {4,3,2,1,0};
 };
 
 struct BattleShip
@@ -50,11 +51,24 @@ public:
     void setRotation(Rotation newRotation) { rot = (int)newRotation; };
 
     //-1 - if no connection otherwise on [0;Length)
-    int IntersectionPosition(PointI PointI);
-    RectI getRect();
-    bool hasIntersection(BattleShip other);
-    bool hasIntersectionAdj(BattleShip other);
-    bool hasIntersectionCorner(BattleShip other);
+    int IntersectionPosition(PointI PointI) const;
+    RectI getRect() const;
+    bool hasIntersection(BattleShip other) const;
+    bool hasIntersectionAdj(BattleShip other) const;
+    bool hasIntersectionCorner(BattleShip other) const;
+
+    bool isDestroyed(int hitMask) const
+    {
+        return hitMask == ((1<<getLength()) - 1);
+    }
+    Results isDestroyedRes(int hitMask) const
+    {
+        return isDestroyed(hitMask) ? Results::Destroy : Results::Hit;
+    }
+    int getHitMask(PointI PointI) const
+    {
+        return 1<<IntersectionPosition(PointI);
+    }
 };
 
 struct Player
