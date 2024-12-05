@@ -20,7 +20,7 @@ set(BaseCpps Players/Player.cpp Players/PcPlayer.cpp DXApp.cpp ${VisualCpps})
 
 add_executable(main WIN32 Main.cpp ${BaseCpps})
 
-target_link_libraries(main PRIVATE d2d1.lib dwrite.lib)
+target_link_libraries(main PRIVATE iphlpapi ws2_32 d2d1.lib dwrite.lib)
 
 include_directories(asio ${Boost_INCLUDE_DIRS})
 add_executable(net Asio.cpp)

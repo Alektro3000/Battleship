@@ -3,7 +3,7 @@
 #ifndef VisualBeginGridH
 #define VisualBeginGridH
 
-struct VisualBeginGrid : VisualGrid
+struct VisualBeginGrid final : VisualGrid
 {
     VisualBeginGrid(GameRules rules);
     std::optional<BattleShip> getIntersectionShipCoord(PointI point)const override;

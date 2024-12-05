@@ -27,7 +27,7 @@ bool VisualBattleGrid::canShipBeAdded(BattleShip shipCopy) const
 }
 void VisualBattleGrid::onRender()
 {
-    render.RenderTarget->DrawRectangle(
+    GetRenderTarget()->DrawRectangle(
                     makeD2DRectF(getGridPos()),
                     blackBrush,3);
 
@@ -36,7 +36,7 @@ void VisualBattleGrid::onRender()
     {
         WCHAR letter(L'0'+i);
         auto offset = position.low + PointI{1+i,0}*getGridSize();
-        render.RenderTarget->DrawText(
+        GetRenderTarget()->DrawText(
                 &letter,
                 1,
                 format,
@@ -48,7 +48,7 @@ void VisualBattleGrid::onRender()
     {
         WCHAR letter(L'А'+i);
         auto offset = position.low + PointI{0,1+i}*getGridSize();
-        render.RenderTarget->DrawText(
+        GetRenderTarget()->DrawText(
                 &letter,
                 1,
                 format,

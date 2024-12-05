@@ -41,7 +41,7 @@ void VisualBeginGrid::addShip(BattleShip ship)
 }
 void VisualBeginGrid::onRender()
 {
-    render.RenderTarget->DrawRectangle(
+    GetRenderTarget()->DrawRectangle(
         makeD2DRectF(getGridPos()),
         blackBrush, 1);
 
@@ -53,7 +53,7 @@ void VisualBeginGrid::onRender()
     if(draw == 0)
     {
         WCHAR let[]{L"Закончить выбор?"};
-        render.RenderTarget->DrawText(
+        GetRenderTarget()->DrawText(
                 let,
                 sizeof(let)/sizeof(WCHAR),
                 format,

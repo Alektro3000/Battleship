@@ -37,62 +37,62 @@ struct Point
     T x;
     T y;
 
-    constexpr Point()
+    constexpr Point() noexcept
         requires std::default_initializable<T>
     {};
-    constexpr Point(T X, T Y) : x((X)), y((Y)) {};
-    constexpr Point(T X) : x(X), y(X) {};
+    constexpr Point(T X, T Y) noexcept: x((X)), y((Y)) {};
+    constexpr Point(T X) noexcept: x(X), y(X) {};
 
     template <typename K>
         requires std::convertible_to<K, T>
-    constexpr Point(Point<K> other) : x(other.x), y(other.y){};
-    constexpr auto operator<=>(const Point &left) const = default;
+    constexpr Point(Point<K> other) noexcept: x(other.x), y(other.y){};
+    constexpr auto operator<=>(const Point &left) const noexcept = default;
 
     template <typename K>
         requires requires(T a, K b) { a * b; }
-    constexpr auto operator*(const K &right) const -> Point<std::decay_t<decltype(x * right)>>
+    constexpr auto operator*(const K &right) const noexcept -> Point<std::decay_t<decltype(x * right)>>
     {
         return {x * right, y * right};
     };
 
     template <typename K>
         requires requires(T a, K b) { a / b; }
-    constexpr auto operator/(const K &right) const -> Point<std::decay_t<decltype(x / right)>>
+    constexpr auto operator/(const K &right) const noexcept -> Point<std::decay_t<decltype(x / right)>>
     {
         return {x / right, y / right};
     };
 
     template <typename K>
         requires requires(T a, K b) { a *b; }
-    constexpr auto operator*(const Point<K> &right) const -> Point<std::decay_t<decltype(x * right.x)>>
+    constexpr auto operator*(const Point<K> &right) const noexcept -> Point<std::decay_t<decltype(x * right.x)>>
     {
         return {x * right.x, y * right.y};
     };
 
     template <typename K>
         requires requires(T a, K b) { a / b; }
-    constexpr auto operator/(const Point<K> &right) const -> Point<std::decay_t<decltype(x / right.x)>>
+    constexpr auto operator/(const Point<K> &right) const noexcept -> Point<std::decay_t<decltype(x / right.x)>>
     {
         return {x / right.x, y / right.y};
     };
 
     template <typename K>
         requires requires(T a, K b) { a - b; }
-    constexpr auto operator-(const Point<K> &right) const -> Point<std::decay_t<decltype(x - right.x)>>
+    constexpr auto operator-(const Point<K> &right) const noexcept -> Point<std::decay_t<decltype(x - right.x)>>
     {
         return {x - right.x, y - right.y};
     };
 
     template <typename K>
         requires requires(T a, K b) { a + b; }
-    constexpr auto operator+(const Point<K> &right) const -> Point<std::decay_t<decltype(x + right.x)>>
+    constexpr auto operator+(const Point<K> &right) const noexcept -> Point<std::decay_t<decltype(x + right.x)>>
     {
         return {x + right.x, y + right.y};
     };
     
     template <typename K>
-        requires requires(T a, K b) { a + b; }
-    constexpr auto operator+(const K &right) const -> Point<std::decay_t<decltype(x + right)>>
+        requires requires(T a, K b) { a + b; } 
+    constexpr auto operator+(const K &right) const noexcept -> Point<std::decay_t<decltype(x + right)>>
     {
         return {x + right, y + right};
     };
@@ -102,7 +102,7 @@ struct Point
     {
         return {-x, -y};
     };
-    constexpr Point rotated(Rotation rot) const
+    constexpr Point rotated(Rotation rot) const noexcept
         requires requires(T a) { -a; }
     {
         switch(rot)
@@ -119,7 +119,7 @@ struct Point
         return {y,x};
         
     };
-    constexpr Point<int> sgn() const
+    constexpr Point<int> sgn() const noexcept
         requires requires(T a) { ::sgn(a); }
     {
         return {::sgn(x),::sgn(y)};

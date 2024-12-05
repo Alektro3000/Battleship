@@ -9,15 +9,15 @@ void SelectScreen::onClick(Button button)
         operation.OnRotate();
         return;
     }
-    if (gridPlayer->getGridPos().isPointInside(getCursor()))
-            operation.OnClickDown(getCursor(), *gridPlayer);
-    else if (gridPlayerBegin->getGridPos().isPointInside(getCursor()))
+    if (getPlayerGrid().getGridPos().isPointInside(getCursor()))
+            operation.OnClickDown(getCursor(), getPlayerGrid());
+    else if (getPlayerStartGrid().getGridPos().isPointInside(getCursor()))
     {
-        if(operation.OnClickDown(getCursor(), *gridPlayerBegin))
-            changeScreenCallback(std::make_unique<BattleScreen>(rules,
+        if(operation.OnClickDown(getCursor(), getPlayerStartGrid()))
+            ChangeScreen(std::make_unique<BattleScreen>(rules,
                  std::move(opponent),
-                 std::move(gridPlayer),
-                 std::move(gridOpponent),
+                 std::move(getPlayerGrid()),
+                 std::move(getOpponentGrid()),
                  isPlayerTurn));
         
     }
@@ -29,10 +29,10 @@ void SelectScreen::onClickUp(Button button)
 {
     if (button != Button::left)
         return;
-    if (gridPlayer->getGridPos().isPointInside(getCursor()))
-        operation.OnClickUp(getCursor(), *gridPlayer);
-    else if (gridPlayerBegin->getGridPos().isPointInside(getCursor()))
-        operation.OnClickUp(getCursor(), *gridPlayerBegin);
+    if (getPlayerGrid().getGridPos().isPointInside(getCursor()))
+        operation.OnClickUp(getCursor(), getPlayerGrid());
+    else if (getPlayerStartGrid().getGridPos().isPointInside(getCursor()))
+        operation.OnClickUp(getCursor(), getPlayerStartGrid());
 };
 
 void SelectScreen::RenderVal(PointI pos, VisualBattleGrid& grid, Results res)
@@ -43,7 +43,7 @@ void SelectScreen::RenderVal(PointI pos, VisualBattleGrid& grid, Results res)
         grayBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
         if(res == Results::Destroy)
         grayBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::DarkRed));
-        render.RenderTarget->FillEllipse(D2D1::Ellipse(makeD2DPointF(grid.getCoordPosition(pos) + grid.getGridSize()/2),10,10),grayBrush);
+        GetRenderTarget()->FillEllipse(D2D1::Ellipse(makeD2DPointF(grid.getCoordPosition(pos) + grid.getGridSize()/2),10,10),grayBrush);
     
         grayBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::LightGray));
     }
@@ -51,43 +51,42 @@ void SelectScreen::RenderVal(PointI pos, VisualBattleGrid& grid, Results res)
 
 void SelectScreen::onRender()
 {
-    render.RenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+    GetRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
     for (int i = 0; i < position .size().x / gridSize.x; i++)
-        render.RenderTarget->DrawLine(D2D1::Point2F(position.low.x + i * gridSize.x, position.low.y),
+        GetRenderTarget()->DrawLine(D2D1::Point2F(position.low.x + i * gridSize.x, position.low.y),
                       D2D1::Point2F(position.low.x + i * gridSize.x, position.high.y), grayBrush);
 
     for (int i = 0; i < position.size().y / gridSize.y; i++)
-        render.RenderTarget->DrawLine(D2D1::Point2F(position.low.x, position.low.y + i * gridSize.y),
+        GetRenderTarget()->DrawLine(D2D1::Point2F(position.low.x, position.low.y + i * gridSize.y),
                       D2D1::Point2F(position.high.x, position.low.y + i * gridSize.y), grayBrush);
 
-    gridPlayer->onRender();
-    gridOpponent->onRender();
+    ScreenOverlay::onRender();
+
+    //GetRenderTarget()->DrawRectangle(makeD2DRectF(getPlayerGrid().getGridPos()),grayBrush,12);
     
-    gridPlayerBegin->onRender();
+    
 
     {
-        operation.OnUpdate(getCursor(), render);
+        operation.OnUpdate(getCursor());
     }
 }
 
 void SelectScreen::onResize(RectF newSize)
 {
-
     Screen::onResize(newSize);
 
-    grayBrush = SolidBrush(render.RenderTarget, D2D1::ColorF(D2D1::ColorF::LightGray));
 
     gridSize = position.size().x / 30;
     auto grid1Offset = gridSize * PointI{2,1};
-    gridPlayer->onResize({grid1Offset, grid1Offset + gridSize * (rules.getSize()+1)});
+    getPlayerGrid().onResize({grid1Offset, grid1Offset + gridSize * (rules.getSize()+1)});
 
     auto grid2Offset = gridSize * PointI{2,1};
     grid2Offset.x = position.size().x - grid2Offset.x - gridSize.x * (1+rules.getSize().x);
-    gridOpponent->onResize({grid2Offset, grid2Offset + gridSize * (rules.getSize()+1)});
+    getOpponentGrid().onResize({grid2Offset, grid2Offset + gridSize * (rules.getSize()+1)});
 
     auto gridBeginOffset = gridSize * Point{2, 12};
-    gridPlayerBegin->onResize({gridBeginOffset, gridBeginOffset + gridSize * (gridPlayerBegin->getSize()+1)});
+    getPlayerStartGrid().onResize({gridBeginOffset, gridBeginOffset + gridSize * (getPlayerStartGrid().getSize()+1)});
 }
 
 //Shows that player ended selecting ships positions
@@ -134,7 +133,7 @@ void SelectScreen::DragAndDropShip::OnClickUp(PointF point, VisualGrid& grid)
     isDown = false;
 }
 
-void SelectScreen::DragAndDropShip::OnUpdate(PointF point, RenderThings drawTarget)
+void SelectScreen::DragAndDropShip::OnUpdate(PointF point)
 {
     if (!isDown)
         return;

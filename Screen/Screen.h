@@ -14,8 +14,19 @@ enum class Button
     left,
     right,
 };
+class IScreen
+{
+public:
+    virtual void onResize(RectF newSize)  {};
+    virtual void onRender()  { };
+    virtual void onClick(Button button) {};
+    virtual void onClickUp(Button button) {};
+    virtual void onChar(WCHAR letter) {};
+    virtual ~IScreen(){};
+};
+void ChangeScreen(std::unique_ptr<IScreen> NewScreen, bool pushToStackPrev = true);
 
-class Screen
+class Screen : public IScreen
 {
 protected:
     PointF getCursor() const
@@ -23,25 +34,15 @@ protected:
         POINT p;
         if(!GetCursorPos(&p))
             throw std::runtime_error("error getting cursor");
-        return makePointF(p) *  makePointF(render.RenderTarget->GetSize())/ makePointF(render.RenderTarget->GetPixelSize());
+        return makePointF(p) *  makePointF(GetRenderTarget()->GetSize())/ makePointF(GetRenderTarget()->GetPixelSize());
     }
     RectF position;
-    RenderThings render;
-    using callback = std::function<void(std::unique_ptr<Screen>)>;
-    callback changeScreenCallback;
 public:
     RectF getPosition()
     {
         return position;
     }
-
-    void changeScreenSetup(callback func)
-    {
-        changeScreenCallback = std::move(func);
-    }
-    virtual void onResize(RectF newSize)  {position = newSize; };
-    virtual void onRender()  { };
-    virtual void onClick(Button button) {};
+    virtual void onResize(RectF newSize) override {position = newSize; };
     bool tryClick(Button button)
     {
         if(position.isPointInsideExcl(getCursor()))
@@ -51,8 +52,6 @@ public:
         }
         return false;
     }
-    virtual void onClickUp(Button button) {};
-    virtual void onChar(WCHAR letter) {};
     bool tryClickUp(Button button)
     {
         if(position.isPointInsideExcl(getCursor()))
@@ -62,9 +61,6 @@ public:
         }
         return false;
     }
-    virtual void init(RenderThings npRT) {render = npRT;};
-    
-    virtual ~Screen(){};
 
 };
 #endif

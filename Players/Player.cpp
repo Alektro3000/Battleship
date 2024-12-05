@@ -2,7 +2,7 @@
 #include "Player.h"
 #include <cassert>
 
-BattleShip::BattleShip(PointI begin, int length, Rotation rotation, int variation)
+BattleShip::BattleShip(PointI begin, int length, Rotation rotation, int variation) noexcept
 {
     x = begin.x;
     y = begin.y;
@@ -11,20 +11,20 @@ BattleShip::BattleShip(PointI begin, int length, Rotation rotation, int variatio
     var = variation;
 }
 
-int BattleShip::IntersectionPosition(PointI point) const
+int BattleShip::IntersectionPosition(PointI point) const noexcept
 {
     auto P = (point - getPoint()).rotated(-getRotation());
     auto shipLength = getLength();
     return (P.x >= 0 && P.x < shipLength && P.y == 0) ? P.x : -1;
 }
-RectI BattleShip::getRect() const
+RectI BattleShip::getRect() const noexcept
 {
     PointI low = getPoint();
     auto P = (PointI{getLength()-1,0}).rotated(getRotation());
     return Rect {low,low + P}.normalized();  
 }
 
-bool BattleShip::hasIntersection(BattleShip other) const
+bool BattleShip::hasIntersection(BattleShip other) const noexcept
 {
     auto a = getRect();
     auto b = other.getRect();
@@ -33,14 +33,14 @@ bool BattleShip::hasIntersection(BattleShip other) const
     return diff.x >= 0 && diff.y >= 0;  
 }
 
-bool BattleShip::hasIntersectionAdj(BattleShip other) const
+bool BattleShip::hasIntersectionAdj(BattleShip other) const noexcept
 {
     auto diff = (getRect()&other.getRect()).size();
 
     return  diff.y >= 0 && diff.x >= -1 || diff.x >= 0 && diff.y >= -1;  
 }
 
-bool BattleShip::hasIntersectionCorner(BattleShip other) const
+bool BattleShip::hasIntersectionCorner(BattleShip other) const noexcept
 {
     auto diff = (getRect()&other.getRect()).size();
     auto fl = diff.x >= -1 && diff.y >= -1;

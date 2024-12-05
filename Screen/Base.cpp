@@ -61,3 +61,10 @@ PointF makePointF(D2D1_SIZE_F p)
     return {p.width, p.height};
 }
 const WCHAR TextFormat::fontName[8] = L"Verdana";
+
+
+
+bool operator==(D2D1::ColorF a, D2D1::ColorF b)
+{
+    return a.a == b.a && a.r == b.r && a.g == b.g && a.b == b.b;
+}

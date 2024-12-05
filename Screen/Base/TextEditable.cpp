@@ -11,7 +11,7 @@ void TextEditable::onChar(WCHAR letter)
             string.push_back(letter);
             auto pos = position.size();
             IDWriteTextLayout* layout;
-            render.WriteFactory->CreateTextLayout(string.c_str(),string.size(),format,pos.x,pos.y, &layout);
+            GetWriteFactory()->CreateTextLayout(string.c_str(),string.size(),format,pos.x,pos.y, &layout);
             DWRITE_TEXT_METRICS lam;
             layout->GetMetrics(&lam);
             layout->Release();

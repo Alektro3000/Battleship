@@ -4,6 +4,12 @@
 #include "DXApp.h"
 #include <windowsx.h>
 
+DXApp* AppPtr;
+void ChangeScreen(std::unique_ptr<IScreen> NewScreen, bool pushToStackPrev)
+{
+    AppPtr->changeScreen(std::move(NewScreen), pushToStackPrev);
+}
+
 // the WindowProc function prototype
 // this is the main message handler for the program
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -16,7 +22,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 // close the application entirely
                 PostQuitMessage(0);
                 return 0;
-        
+        case WM_SIZE:
+            if(AppPtr)
+                AppPtr->onWinResize(LOWORD(lParam), HIWORD(lParam));
+            break;
     }
 
     // Handle any messages the switch statement didn't
@@ -49,22 +58,24 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // register the window class
     RegisterClassExW(&wc);
-    RECT wr = {0, 0, 1920, 1080};    // set the size, but not the position
+    RECT wr = {0, 0, 800, 600};    // set the size, but not the position
     AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);    // adjust the size
 
     // create the window and use the result as the handle
-    hWnd = CreateWindowExW(NULL,
+    hWnd = CreateWindowEx(NULL,
                           L"WindowClass1",    // name of the window class
-                          L"Our Direct3D Program",   // title of the window
-                          WS_EX_TOPMOST | WS_POPUP, 
+                          L"BattleShip",   // title of the window
+                          WS_EX_TOPMOST | WS_POPUP,  //WS_OVERLAPPEDWINDOW, 
                           0,    // x-position of the window
-                          0,    // y-position of the window
+                          0,    // y-position of the window                          
                           GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 
+                                        //wr.right-wr.left, wr.bottom-wr.top, 
                           NULL,    // we have no parent window, NULL
                           NULL,    // we aren't using menus, NULL
                           hInstance,    // application handle
                           NULL);    // used with multiple windows, NULL
 
+                          L"WindowClass1",    // name of the window class
 
 
     // display the window on the screen
@@ -73,11 +84,12 @@ int WINAPI WinMain(HINSTANCE hInstance,
     // enter the main loop:
     DXApp App(hWnd);
     App.changeScreen(std::make_unique<MenuScreen>());
+    AppPtr = &App;
     // this struct holds Windows event messages
     MSG msg = {0};
 
     // wait for the next message in the queue, store the result in 'msg'
-    while(TRUE)
+    while(true)
     {
         // Check to see if any messages are waiting in the queue
         if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))

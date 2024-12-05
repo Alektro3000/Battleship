@@ -7,6 +7,8 @@ void TextBox::onResize(RectF newSize)
 void TextBox::onRender()
 {
     Screen::onRender();
-    render.RenderTarget->DrawRectangle(makeD2DRectF(position),brush);
-    render.RenderTarget->DrawText(string.c_str(), string.size(), format, makeD2DRectF(position), brush);
+    
+    GetRenderTarget()->FillRoundedRectangle(D2D1::RoundedRect(makeD2DRectF(position),10,10),backBrush);
+    GetRenderTarget()->DrawRoundedRectangle(D2D1::RoundedRect(makeD2DRectF(position),10,10),brush);
+    GetRenderTarget()->DrawText(string.c_str(), string.size(), format, makeD2DRectF(position), brush);
 }

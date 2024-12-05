@@ -20,6 +20,9 @@ struct GameRules
     constexpr PointI getSize() {return {10,10};};
     constexpr int getShipAmount(int i) {return ShipsAmounts[i-1];};
     constexpr int getTotalShipAmount() {return std::accumulate(ShipsAmounts.begin(),ShipsAmounts.end(),0);};
+    constexpr int getTotalHitAmount() 
+    {return std::accumulate(ShipsAmounts.begin(),ShipsAmounts.end(),0,[i = 1](auto prev, auto cur) mutable
+    {return prev + cur * i++;});};
     constexpr int getMaxShipLength() {return ShipsAmounts.size();};
     constexpr bool AllowedDiagonals() {return false;};
     constexpr int flatIndex(PointI pos) {return pos.x * getSize().y + pos.y;};
@@ -39,33 +42,33 @@ private:
 public:
     constexpr auto operator<=>(const BattleShip &left) const = default;
 
-     BattleShip(): BattleShip({0,0},0) {};
-    BattleShip(PointI begin, int length = 1, Rotation rotation = Rotation::Right, int variation = 0);
-    int getX() const { return x; };
-    int getY() const { return y;  };
-    PointI getPoint() const { return {getX(), getY()};  };
-    int getLength() const { return len;  };
-    Rotation getRotation() const { return (Rotation)rot; };
-    int getVariatin() const  { return var; };
-    void setPoint(PointI newStart) { x=newStart.x; y = newStart.y; };
-    void setRotation(Rotation newRotation) { rot = (int)newRotation; };
+     BattleShip() noexcept : BattleShip({0,0},0) {};
+    BattleShip(PointI begin, int length = 1, Rotation rotation = Rotation::Right, int variation = 0) noexcept;
+    int getX() const noexcept { return x; };
+    int getY() const noexcept { return y;  };
+    PointI getPoint() const noexcept { return {getX(), getY()};  };
+    int getLength() const noexcept { return len;  };
+    Rotation getRotation() const noexcept { return (Rotation)rot; };
+    int getVariatin() const noexcept { return var; };
+    void setPoint(PointI newStart) noexcept { x=newStart.x; y = newStart.y; };
+    void setRotation(Rotation newRotation) noexcept { rot = (int)newRotation; };
 
     //-1 - if no connection otherwise on [0;Length)
-    int IntersectionPosition(PointI PointI) const;
-    RectI getRect() const;
-    bool hasIntersection(BattleShip other) const;
-    bool hasIntersectionAdj(BattleShip other) const;
-    bool hasIntersectionCorner(BattleShip other) const;
+    int IntersectionPosition(PointI PointI) const noexcept;
+    RectI getRect() const noexcept;
+    bool hasIntersection(BattleShip other) const noexcept;
+    bool hasIntersectionAdj(BattleShip other) const noexcept;
+    bool hasIntersectionCorner(BattleShip other) const noexcept;
 
-    bool isDestroyed(int hitMask) const
+    bool isDestroyed(int hitMask) const noexcept
     {
         return hitMask == ((1<<getLength()) - 1);
     }
-    Results isDestroyedRes(int hitMask) const
+    Results isDestroyedRes(int hitMask) const noexcept
     {
         return isDestroyed(hitMask) ? Results::Destroy : Results::Hit;
     }
-    int getHitMask(PointI PointI) const
+    int getHitMask(PointI PointI) const noexcept
     {
         return 1<<IntersectionPosition(PointI);
     }
@@ -80,6 +83,8 @@ struct Player
 
     virtual PointI GetMove() = 0;
     virtual void ReturnResult(Results Point) = 0; 
+
+    virtual void onDetach() {}; 
 };
 
 #endif

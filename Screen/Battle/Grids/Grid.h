@@ -11,7 +11,7 @@ class VisualGrid : public Screen
 protected:
     PointI size;
     SolidBrush blackBrush;
-    TextFormat format; 
+    TextFormat format = {40}; 
 public:
     VisualGrid(PointI size) : size(size) {};
     PointI getPointCoords(PointF point) const;
@@ -35,10 +35,6 @@ public:
     virtual bool canShipBeAdded(BattleShip ship) const = 0;
     
     void onResize(RectF newSize) override;
-    void init(RenderThings renderer) override{
-        Screen::init(renderer);
-        blackBrush = SolidBrush(render.RenderTarget,D2D1::ColorF(D2D1::ColorF::Black));
-    };
     
     void DrawShip(BattleShip ship, RectF position) const;
 };

@@ -2,21 +2,20 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ip/address_v4.hpp>
+#include <boost/lockfree/queue.hpp>
 #include <winsock2.h>
 #include <iphlpapi.h>
-
-std::string make_daytime_string()
-{
-  using namespace std; // For time_t, time and ctime;
-  time_t now = time(0);
-  return ctime(&now);
-}
-
 
 struct Response
 {
   std::array<wchar_t, 32> name;
   int len;
+};
+
+struct ResponseFull
+{
+  Response response;
+  boost::asio::ip::address_v4 ipv4;
 };
 using boost::asio::ip::udp;
 using boost::asio::ip::tcp;
@@ -75,75 +74,100 @@ std::vector<netIps> queryDevices() {
     return ans;
 }
 
+class ResponseCollector {
+public:
+    std::vector<ResponseFull> responses;
+    ResponseCollector(boost::asio::io_context& io_context, udp::socket& socket)
+        : socket_(socket),
+        deadline_(io_context) {
+        startReceive();
+    }
 
-std::string get_local_ip(boost::asio::io_service& io_service) 
-{ 
-  try { 
-    udp::resolver resolver(io_service); 
-    udp::resolver::query query(boost::asio::ip::host_name(), ""); 
-    udp::resolver::iterator iter = resolver.resolve(query); 
-    udp::resolver::iterator end; 
+private:
+    void startReceive() {
+        deadline_.expires_from_now(boost::posix_time::seconds(1));
+        socket_.async_receive_from(
+            boost::asio::buffer(recv_buffer_),
+            remote_endpoint_,
+           [this](auto error, auto bytes){handleReceive(error,bytes);});
+        deadline_.async_wait([this](const auto& error){checkDeadline();});
+    }
 
-    while (iter != end) 
-    { 
-      boost::asio::ip::udp::endpoint ep = *iter++; 
-      if (ep.address().is_v4()) { std::cout << ep.address().to_string() << std::endl; } 
-      } 
-  } 
-  catch (std::exception& e) { 
-        std::cerr << "Exception: " << e.what() << std::endl; 
-  } 
-  return "";
-}
+    void handleReceive(const boost::system::error_code& error, std::size_t bytes_transferred) {
+        if (!error) {
+            deadline_.expires_from_now(boost::posix_time::seconds(4));
+#ifdef AdditionalLogging
+            std::cout << "Received: " << bytes_transferred << " ";
+            std::wcout << std::wstring(recv_buffer_[0].name.begin(), recv_buffer_[0].name.begin()+recv_buffer_[0].len) << std::endl;
+            std::cout << "from " << remote_endpoint_.address() << std::endl;
+#endif
+            responses.push_back({recv_buffer_[0], remote_endpoint_.address().to_v4()});
+            // Ready to receive next packet
+            startReceive(); 
+        }
+    }
+    void checkDeadline()
+    {
+      //Check for false invocation
+      if (deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now())
+      {
+        socket_.cancel();
+        socket_.close();
+        //Disable timer
+        deadline_.expires_at(boost::posix_time::pos_infin);
+      }
+    }
+    udp::socket& socket_;
+    udp::endpoint remote_endpoint_;
+    std::array<Response, 2> recv_buffer_;
+    boost::asio::deadline_timer deadline_;
+};
 
-std::vector<std::string> queryServers(boost::asio::io_service& io_service, netIps ip)
+std::vector<ResponseFull> queryServers(boost::asio::io_context& io_context, netIps ip)
 {
-    udp::socket socket(io_service,udp::v4());
+    udp::socket socket(io_context,udp::v4());
     socket.set_option(boost::asio::socket_base::broadcast(true));    
     
-
     udp::endpoint senderEndpoint(ip.broadcast, 3190);
 
     socket.send_to(boost::asio::buffer(make_daytime_string()), senderEndpoint);
-
-    Response reply[1];
-    boost::system::error_code error;
-    udp::endpoint responseEndpoint(boost::asio::ip::address_v4::any(),3190);
-    std::vector<std::string> ip_addresses;
-
-    while (true) {
-        size_t len = socket.async_receive_from(boost::asio::buffer(reply), responseEndpoint,
-          boost::bind(&handle_receive, this, boost::asio::placeholders::error, 
-          boost::asio::placeholders::bytes_transferred));
-        if (error == boost::asio::error::would_block || error == boost::asio::error::message_size) {
-            break; // Stop receiving if no more responses or buffer overflow
-        } else if (!error) {
-            std::string ip = responseEndpoint.address().to_string();
-            ip_addresses.push_back(ip);
-            std::cout << "Received reply from " << ip << std::endl;
-            std::cout << "Reply: ";
-            std::wcout << std::wstring{reply->name.begin(),reply->name.begin()+reply->len} << std::endl;
-        }
-    }
-    return ip_addresses;
+    socket.set_option(boost::asio::socket_base::broadcast(false));    
+    
+    ResponseCollector val(io_context, socket);
+    io_context.run();
+    return val.responses;
 }
 
-
-int main(int argc, char* argv[])
+std::vector<ResponseFull> queryServers()
 {
-  try
-  {
-    auto a =  queryDevices();
-    boost::asio::io_service io_service;
-    for(auto q:a)
+  
+    auto devices = queryDevices();
+    std::vector<std::future<std::vector<ResponseFull> > > tasks;
+    for(auto ip:devices)
     {
-      queryServers(io_service,q);
+      tasks.push_back(std::async([ip](){
+        boost::asio::io_context io_context;
+        auto resp = queryServers(io_context,ip);
+#ifdef AdditionalLogging
+        std::cout << "Ended quering: " << ip.ip.to_string() << std::endl;
+#endif
+        return resp;
+      }));
     }
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-  }
+    std::vector<ResponseFull> responses;
+    for(auto& task:tasks)
+    {
+      auto val = task.get();
+      std::copy(val.begin(),val.end(),std::back_inserter(responses));
+    }
 
-  return 0;
+#ifdef AdditionalLogging
+    std::cout << "Total Answer" << std::endl;
+#endif
+    for(auto response:responses)
+    {
+      std::wcout << std::wstring(response.response.name.begin(), response.response.name.begin() + response.response.len) << std::endl;
+      std::cout << "From: " <<  response.ipv4.to_string() <<std::endl;
+    }
+     
 }

@@ -1,10 +1,11 @@
-#include "../Screen.h"
+#include "../ScreenOverlay.h"
 
 #ifndef ButtonScreenH
 #define ButtonScreenH
 
+/*
 
-class ButtonScreen : public Screen
+class ButtonScreen final : public Screen 
 {
     std::unique_ptr<Screen> child;
     std::function<void(Button)> callback;
@@ -17,6 +18,20 @@ public:
     }
     void onResize(RectF newSize) override;
     void onRender() override;
-    void init(RenderThings renderer) override;
+};
+*/
+
+
+template<typename T>
+class ButtonScreen final : public ScreenOverlay<T> 
+{
+    std::function<void(Button)> callback;
+public:
+    ButtonScreen(T&& child, auto&& callback):
+        ScreenOverlay<T>({RectF{{0},{1}},std::move(child)}), callback(std::move(callback)) {};
+    void onClick(Button button) override
+    {
+        callback(button);
+    }
 };
 #endif

@@ -4,7 +4,7 @@
 
 void VisualGrid::DrawShip(BattleShip ship, RectF position) const
 {
-        render.RenderTarget->FillRectangle(
+        GetRenderTarget()->FillRectangle(
             makeD2DRectF(position),
             blackBrush);
 }
@@ -51,5 +51,5 @@ bool VisualGrid::isShipInsideGrid(BattleShip ship) const
 void VisualGrid::onResize(RectF newSize)
 {
         Screen::onResize(newSize);
-        format = TextFormat(render.WriteFactory,getGridSize().y * 0.8f);
+        format = TextFormat(getGridSize().y * 0.8f);
 }

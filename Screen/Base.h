@@ -1,4 +1,5 @@
 #define UNICODE
+#define WIN32_LEAN_AND_MEAN
 #include <dwrite.h>
 #include <d2d1.h>
 #include <utility>
@@ -21,18 +22,18 @@ D2D1_POINT_2F makeD2DPointF(PointF p);
 
 D2D1_RECT_F makeD2DRectF(RectF rect);
 
-struct RenderThings
-{
-    ID2D1Factory *D2DFactory = nullptr;
-    ID2D1HwndRenderTarget *RenderTarget = nullptr;
-    IDWriteFactory *WriteFactory = nullptr;
-};
+bool operator==(D2D1::ColorF a, D2D1::ColorF b);
+
+
+ID2D1Factory* GetD2DFactory();
+ID2D1HwndRenderTarget* GetRenderTarget();
+IDWriteFactory* GetWriteFactory();
+
 struct SolidBrush
 {
     ID2D1SolidColorBrush* brush;
-    SolidBrush():brush(nullptr){};
-    SolidBrush(ID2D1HwndRenderTarget* renderTarget, D2D1::ColorF color) {
-        renderTarget->CreateSolidColorBrush(
+    SolidBrush(D2D1::ColorF color = D2D1::ColorF(0)) {
+        GetRenderTarget()->CreateSolidColorBrush(
             color,
             &brush);
     }
@@ -62,9 +63,8 @@ struct TextFormat
 {
     IDWriteTextFormat *textFormat;
     static const WCHAR fontName[8];
-    TextFormat():textFormat(nullptr){};
-    TextFormat(IDWriteFactory* factory, int size) {
-        factory->CreateTextFormat(
+    TextFormat(int size) {
+        GetWriteFactory()->CreateTextFormat(
             fontName,
             nullptr,
             DWRITE_FONT_WEIGHT_NORMAL,
