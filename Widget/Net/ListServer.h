@@ -6,8 +6,8 @@
 #include <future>
 #include <atomic>
 
-#ifndef ScreenListH
-#define ScreenListH
+#ifndef WidgetListH
+#define WidgetListH
 
 struct ResponseFull
 {
@@ -15,7 +15,7 @@ struct ResponseFull
   boost::asio::ip::address_v4 ipv4;
 };
 
-class ListScreen : public ScreenOverlay<ButtonScreen<TextBox>,ButtonScreen<TextBox> >
+class ListWidget : public WidgetOverlay<ButtonWidget<TextBox>,ButtonWidget<TextBox> >
 {
 private:
     std::future<std::vector<ResponseFull> > quering;
@@ -27,11 +27,11 @@ private:
     TextBox NoServerBox={L"Нет серверов",40};
     TextFormat format = {40};
 public:
-    ListScreen(): ScreenOverlay({RectF{{0.7,0.92},{0.99,0.98}},
-        ButtonScreen(TextBox(L"Создать сервер",40,D2D1::ColorF(D2D1::ColorF::Black)),
-        [this](auto _){ChangeScreen(std::make_unique<ServerScreen>());})},
+    ListWidget(): WidgetOverlay({RectF{{0.7,0.92},{0.99,0.98}},
+        ButtonWidget(TextBox(L"Создать сервер",40,D2D1::ColorF(D2D1::ColorF::Black)),
+        [this](auto _){ChangeWidget(std::make_unique<ServerWidget>());})},
         {RectF{{0.5,0.92},{0.68,0.98}},
-        ButtonScreen(TextBox(L"Обновить",40,D2D1::ColorF(D2D1::ColorF::Black)),
+        ButtonWidget(TextBox(L"Обновить",40,D2D1::ColorF(D2D1::ColorF::Black)),
         [this](auto _){ updateServers();})})
     {
         updateServers();

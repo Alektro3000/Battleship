@@ -1,13 +1,23 @@
 #include <iostream>
 #include "Players/PcPlayer.h"
-#include "Screen/Menu.h"
+#include "Widget/Menu.h"
 #include "DXApp.h"
 #include <windowsx.h>
 
 DXApp* AppPtr;
-void ChangeScreen(std::unique_ptr<IScreen> NewScreen, bool pushToStackPrev)
+void ChangeWidget(std::unique_ptr<IWidget> NewWidget, bool pushToStackPrev)
 {
-    AppPtr->changeScreen(std::move(NewScreen), pushToStackPrev);
+    AppPtr->changeWidget(std::move(NewWidget), pushToStackPrev);
+}
+
+PointF getCursor()
+{
+    POINT p;
+    if (!GetCursorPos(&p))
+        throw std::runtime_error("error getting cursor");
+    if(!ScreenToClient(AppPtr->hWnd, &p))
+        throw std::runtime_error("error getting client");
+    return (makePointF(p)) * makePointF(GetRenderTarget()->GetSize()) / makePointF(GetRenderTarget()->GetPixelSize());
 }
 
 // the WindowProc function prototype
@@ -65,11 +75,11 @@ int WINAPI WinMain(HINSTANCE hInstance,
     hWnd = CreateWindowEx(NULL,
                           L"WindowClass1",    // name of the window class
                           L"BattleShip",   // title of the window
-                          WS_EX_TOPMOST | WS_POPUP,  //WS_OVERLAPPEDWINDOW, 
+                          WS_OVERLAPPEDWINDOW, //WS_EX_TOPMOST | WS_POPUP,
                           0,    // x-position of the window
                           0,    // y-position of the window                          
-                          GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 
-                                        //wr.right-wr.left, wr.bottom-wr.top, 
+                          //GetSystemMetrics(SM_CXWIDGET), GetSystemMetrics(SM_CYWIDGET), 
+                          wr.right-wr.left, wr.bottom-wr.top, 
                           NULL,    // we have no parent window, NULL
                           NULL,    // we aren't using menus, NULL
                           hInstance,    // application handle
@@ -78,12 +88,12 @@ int WINAPI WinMain(HINSTANCE hInstance,
                           L"WindowClass1",    // name of the window class
 
 
-    // display the window on the screen
+    // display the window on the widget
     ShowWindow(hWnd, nCmdShow);
 
     // enter the main loop:
     DXApp App(hWnd);
-    App.changeScreen(std::make_unique<MenuScreen>());
+    App.changeWidget(std::make_unique<MenuWidget>());
     AppPtr = &App;
     // this struct holds Windows event messages
     MSG msg = {0};

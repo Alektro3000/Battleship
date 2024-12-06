@@ -146,7 +146,7 @@ std::vector<ResponseFull> queryServers()
     return responses;
 }
  
- void ListScreen::updateServers()
+ void ListWidget::updateServers()
  {
     if(!quering.valid())
     {
@@ -155,15 +155,15 @@ std::vector<ResponseFull> queryServers()
         quering = std::async(std::launch::async,[this](){auto a = queryServers(); isFutureReady = true; return a;});
     }
  }
-void ListScreen::onResize(RectF newSize)
+void ListWidget::onResize(RectF newSize)
 {
-    ScreenOverlay::onResize(newSize);
+    WidgetOverlay::onResize(newSize);
     NoServerBox.onResize(RectF{{0.1,0.1},{0.9,0.9}}.scaled(newSize));
 }
-void ListScreen::onRender()
+void ListWidget::onRender()
 {
     GetRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
-    ScreenOverlay::onRender();
+    WidgetOverlay::onRender();
     
     if(isUpdating && isFutureReady)
     {

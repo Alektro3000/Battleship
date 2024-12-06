@@ -1,45 +1,45 @@
-#include "Screen.h"
+#include "Widget.h"
 #include <tuple>
 #include <utility> 
 
-#ifndef ScreenOverlayH
-#define ScreenOverlayH
-template<typename ...Args>
-class ScreenOverlay : public Screen
+#ifndef WidgetOverlayH
+#define WidgetOverlayH
+template<TWidget ...Args>
+class WidgetOverlay : public Widget
 {
 protected:
-    std::tuple<Args...> _screens;
+    std::tuple<Args...> _widgets;
     std::array<RectF, sizeof...(Args)> _pos;
 public:
-    ScreenOverlay(std::pair<RectF,Args&&>... args) : _screens(std::move(args.second)...), _pos((args.first)...) {
+    WidgetOverlay(std::pair<RectF,Args&&>... args) : _widgets(std::move(args.second)...), _pos((args.first)...) {
 
     }
-    ScreenOverlay(Args&&... args) : _screens(std::move(args)...), _pos(RectF{{0},{1}}){
+    WidgetOverlay(Args&&... args) : _widgets(std::move(args)...), _pos(RectF{{0},{1}}){
 
     }
     void onResize(RectF newSize) override {
-        Screen::onResize(newSize);
+        Widget::onResize(newSize);
         helper([newSize](RectF rect, auto& scr) 
         {scr.onResize(rect.scaled(newSize));});
     };
     void onRender() override {
-        Screen::onRender();
+        Widget::onRender();
         helper([](RectF rect, auto& scr) 
         {scr.onRender();});
     };
     void onClick(Button button) override {
-        Screen::onClick(button);
+        Widget::onClick(button);
         helper([button](RectF rect, auto& scr) 
         {scr.tryClick(button);});
     };
     void onClickUp(Button button) override {
-        Screen::onClickUp(button);
+        Widget::onClickUp(button);
         helper([button](RectF rect, auto& scr) 
         {
             scr.tryClickUp(button);});
         };
     void onChar(WCHAR letter) override {
-        Screen::onChar(letter);
+        Widget::onChar(letter);
         helper([letter](RectF rect, auto& scr) 
         { scr.onChar(letter);});
     }
@@ -48,7 +48,7 @@ public:
     template <std::size_t I = 0, typename F >
     void helper(const F& function) {
         if constexpr (I < sizeof...(Args)) {
-            function((_pos)[I], std::get<I>(_screens));
+            function((_pos)[I], std::get<I>(_widgets));
             helper<I + 1>(function);
         }
     }

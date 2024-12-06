@@ -8,8 +8,8 @@
 #include "../Players/Player.h"
 #include "../Math/Rect.h"
 
-#ifndef BaseScreenH
-#define BaseScreenH
+#ifndef BaseWidgetH
+#define BaseWidgetH
 HRESULT LoadBitmapFromFile(ID2D1RenderTarget*, IWICImagingFactory*, const wchar_t*, ID2D1Bitmap**);
 
 

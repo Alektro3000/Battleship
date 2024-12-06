@@ -1,12 +1,12 @@
 #include "../../../Players/Player.h"
-#include "../../Screen.h"
+#include "../../Widget.h"
 #include "../../Base.h"
 #include <optional>
 
 #ifndef VisualGridH
 #define VisualGridH
 
-class VisualGrid : public Screen
+class VisualGrid : public Widget
 {
 protected:
     PointI size;

@@ -1,9 +1,9 @@
-#include "../Screen.h"
+#include "../Widget.h"
 
 #ifndef TextBoxH
 #define TextBoxH
 
-class TextBox : public Screen
+class TextBox : public Widget
 {
 protected:
     TextFormat format;

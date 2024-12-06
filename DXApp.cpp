@@ -4,6 +4,7 @@
 ID2D1Factory *D2DFactory = nullptr;
 ID2D1HwndRenderTarget *RenderTarget = nullptr;
 IDWriteFactory *WriteFactory = nullptr;
+
 ID2D1Factory *GetD2DFactory() { return D2DFactory; };
 ID2D1HwndRenderTarget *GetRenderTarget() { return RenderTarget; };
 IDWriteFactory *GetWriteFactory() { return WriteFactory; };
@@ -43,20 +44,21 @@ void DXApp::onWinResize(UINT32 width, UINT32 height)
 
     RenderTarget->Resize(D2D1::SizeU(width, height));
     size = makePointF(RenderTarget->GetSize());
-    currentScreen->onResize({{0}, size});
+    currentWidget->onResize({{0}, size});
 };
 
 void DXApp::renderFrame()
 {
     RenderTarget->BeginDraw();
 
-    currentScreen->onRender();
+    currentWidget->onRender();
 #ifdef LiveCheck
     SolidBrush brush{RenderTarget, D2D1::ColorF(rand(), 0.5)};
     RenderTarget->FillRectangle(makeD2DRectF({{0, 0}, {100, 100}}), brush);
 #endif
     HRESULT hr = RenderTarget->EndDraw();
 }
+
 DXApp::~DXApp()
 {
     // if(WICFactory) WICFactory->Release();

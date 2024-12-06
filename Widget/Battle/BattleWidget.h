@@ -1,14 +1,14 @@
 #include "Grids/BattleGrid.h"
 #include "../Base/TextBox.h"
-#include "../ScreenOverlay.h"
+#include "../WidgetOverlay.h"
 #include <thread>
 
-#include "../Screen.h"
+#include "../Widget.h"
 
 #ifndef BattleAppH
 #define BattleAppH
 
-class BattleScreen final : public ScreenOverlay<VisualBattleGrid, VisualBattleGrid>
+class BattleWidget final : public WidgetOverlay<VisualBattleGrid, VisualBattleGrid>
 {
     // Could be changed from another thread
     std::atomic<bool> isPlayerTurn;
@@ -32,11 +32,11 @@ class BattleScreen final : public ScreenOverlay<VisualBattleGrid, VisualBattleGr
 
     VisualBattleGrid& getPlayerGrid()
     {
-        return std::get<0>(_screens);
+        return std::get<0>(_widgets);
     }
     VisualBattleGrid& getOpponentGrid()
     {
-        return std::get<1>(_screens);
+        return std::get<1>(_widgets);
     }
     std::vector<int> shipHits;
 
@@ -45,7 +45,7 @@ class BattleScreen final : public ScreenOverlay<VisualBattleGrid, VisualBattleGr
     SolidBrush redBrush{D2D1::ColorF(D2D1::ColorF::Red)};
 
 public:
-    BattleScreen(GameRules nRules,
+    BattleWidget(GameRules nRules,
                  std::unique_ptr<Player> nOpponent,
                  VisualBattleGrid&& gridPlayer,
                  VisualBattleGrid&& gridOpponent,

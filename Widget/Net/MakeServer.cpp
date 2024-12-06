@@ -73,23 +73,23 @@ void holdServer(std::stop_token stop_token, std::wstring name)
     socket.close();
 }
 
-void ServerScreen::makeServer()
+void ServerWidget::makeServer()
 {
 
 }
-void ServerScreen::onResize(RectF newSize)
+void ServerWidget::onResize(RectF newSize)
 {
-    ScreenOverlay::onResize(newSize);
+    WidgetOverlay::onResize(newSize);
     text.onResize(TextBegin.scaled(newSize));
 }
-void ServerScreen::onChar(WCHAR letter)
+void ServerWidget::onChar(WCHAR letter)
 {
     text.onChar(letter);
 }
 
-void ServerScreen::onRender()
+void ServerWidget::onRender()
 {
     GetRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
-    ScreenOverlay::onRender();
+    WidgetOverlay::onRender();
     text.onRender();
 }

@@ -1,10 +1,10 @@
-#include "../Screen.h"
+#include "../Widget.h"
 #include "../Base/TextEditable.h"
 #include "../Base/Button.h"
-#include "../ScreenOverlay.h"
+#include "../WidgetOverlay.h"
 
-#ifndef ScreenSelectMakeServerH
-#define ScreenSelectMakeServerH
+#ifndef WidgetSelectMakeServerH
+#define WidgetSelectMakeServerH
 
 struct Response
 {
@@ -13,14 +13,14 @@ struct Response
 };
 
 
-class ServerScreen : public ScreenOverlay<ButtonScreen<TextBox> >
+class ServerWidget : public WidgetOverlay<ButtonWidget<TextBox> >
 {
     TextEditable text;
     constexpr static RectF TextBegin = {{0.05,0.4},{0.4,0.48}};
     constexpr static RectF ButtonPos = {{0.8,0.88},{0.98,0.99}};
 public:
-    ServerScreen() : ScreenOverlay({ButtonPos,
-      ButtonScreen{TextBox(L"Создать сервер",40),[this](auto _){makeServer();}}}), 
+    ServerWidget() : WidgetOverlay({ButtonPos,
+      ButtonWidget{TextBox(L"Создать сервер",40),[this](auto _){makeServer();}}}), 
         text(L"",40,D2D1::ColorF(D2D1::ColorF::Black)){};
     void onChar(WCHAR letter) override;
     void onResize(RectF newSize) override;

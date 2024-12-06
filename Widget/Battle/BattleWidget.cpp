@@ -1,11 +1,11 @@
-#include "BattleScreen.h"
+#include "BattleWidget.h"
 #include <thread>
 #include <algorithm>
-BattleScreen::BattleScreen(GameRules nRules,
+BattleWidget::BattleWidget(GameRules nRules,
                            std::unique_ptr<Player> nOpponent,
                             VisualBattleGrid&& PlayerGrid,
                             VisualBattleGrid&& OpponentGrid,
-                           bool isPlayerTurn) : ScreenOverlay(std::move(PlayerGrid),std::move(OpponentGrid)), isPlayerTurn(isPlayerTurn),
+                           bool isPlayerTurn) : WidgetOverlay(std::move(PlayerGrid),std::move(OpponentGrid)), isPlayerTurn(isPlayerTurn),
                                                        opponent(std::move(nOpponent)), rules(std::move(nRules)),
                                                        opponentShots(nRules.getSize().x * nRules.getSize().y),
                                                        playerShots(nRules.getSize().x * nRules.getSize().y),
@@ -18,7 +18,7 @@ BattleScreen::BattleScreen(GameRules nRules,
     }
 };
 
-void BattleScreen::onClick(Button button)
+void BattleWidget::onClick(Button button)
 {
     if (isValid && isPlayerTurn && getOpponentGrid().getGridPos().isPointInsideExcl(getCursor()))
     {
@@ -48,7 +48,7 @@ void BattleScreen::onClick(Button button)
             } });
     }
 };
-void BattleScreen::getMove()
+void BattleWidget::getMove()
 {
     PointI shot = opponent->GetMove();
     auto damagedShip = std::find_if(getPlayerGrid().begin(), getPlayerGrid().end(),
@@ -79,7 +79,7 @@ void BattleScreen::getMove()
         isPlayerTurn = true;
 }
 
-void BattleScreen::RenderVal(PointI pos, VisualBattleGrid &grid, Results res)
+void BattleWidget::RenderVal(PointI pos, VisualBattleGrid &grid, Results res)
 {
     auto ellipse = D2D1::Ellipse(makeD2DPointF(grid.getCoordPosition(pos) + grid.getGridSize() / 2), 10, 10);
     if(res  == Results::Miss)
@@ -94,7 +94,7 @@ void BattleScreen::RenderVal(PointI pos, VisualBattleGrid &grid, Results res)
     }
 }
 
-void BattleScreen::onRender()
+void BattleWidget::onRender()
 {
     GetRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
@@ -106,16 +106,16 @@ void BattleScreen::onRender()
         GetRenderTarget()->DrawLine(D2D1::Point2F(position.low.x, position.low.y + i * gridSize.y),
                                       D2D1::Point2F(position.high.x, position.low.y + i * gridSize.y), grayBrush);
 
-    ScreenOverlay::onRender();
+    WidgetOverlay::onRender();
     for (int i = 0; i < rules.getSize().x; i++)
         for (int j = 0; j < rules.getSize().y; j++)
         {
             RenderVal({i, j}, getPlayerGrid(), playerShots[i * rules.getSize().y + j]);
             RenderVal({i, j}, getOpponentGrid(), opponentShots[i * rules.getSize().y + j]);
         }
-    textBox.onRender();
     GetRenderTarget()->DrawRectangle(makeD2DRectF((isPlayerTurn?getOpponentGrid():getPlayerGrid()).getGridPos()),redBrush,3);
     
+    textBox.onRender();
     if (textBox.GetBackgroundColor() == D2D1::ColorF(0, 0))
     {
         if (isLost)
@@ -140,9 +140,9 @@ void BattleScreen::onRender()
     }
 }
 
-void BattleScreen::onResize(RectF newSize)
+void BattleWidget::onResize(RectF newSize)
 {
-    Screen::onResize(newSize);
+    Widget::onResize(newSize);
     textBox.onResize(RectF{{0.3, 0.4}, {0.7, 0.6}}.scaled(newSize));
 
     gridSize = position.size().x / 30;

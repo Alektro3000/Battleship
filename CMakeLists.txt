@@ -11,11 +11,11 @@ find_package(Catch2 3 REQUIRED)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(BattleCpps BattleScreen.cpp SelectScreen.cpp Grids/BattleGrid.cpp Grids/BeginGrid.cpp Grids/Grid.cpp)
+set(BattleCpps BattleWidget.cpp SelectWidget.cpp Grids/BattleGrid.cpp Grids/BeginGrid.cpp Grids/Grid.cpp)
 list(TRANSFORM BattleCpps PREPEND "Battle/")
 
 set(VisualCpps Base.cpp Menu.cpp Net/MakeServer.cpp Net/ListServer.cpp Base/Button.cpp Base/TextBox.cpp  Base/TextEditable.cpp ${BattleCpps}) 
-list(TRANSFORM VisualCpps PREPEND "Screen/")
+list(TRANSFORM VisualCpps PREPEND "Widget/")
 set(BaseCpps Players/Player.cpp Players/PcPlayer.cpp DXApp.cpp ${VisualCpps}) 
 
 add_executable(main WIN32 Main.cpp ${BaseCpps})

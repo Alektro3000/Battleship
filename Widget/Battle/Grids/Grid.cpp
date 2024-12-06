@@ -50,6 +50,6 @@ bool VisualGrid::isShipInsideGrid(BattleShip ship) const
 
 void VisualGrid::onResize(RectF newSize)
 {
-        Screen::onResize(newSize);
+        Widget::onResize(newSize);
         format = TextFormat(getGridSize().y * 0.8f);
 }

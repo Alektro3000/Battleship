@@ -1,8 +1,8 @@
-#include "SelectScreen.h"
-#include "BattleScreen.h"
+#include "SelectWidget.h"
+#include "BattleWidget.h"
 #include <thread>
 
-void SelectScreen::onClick(Button button)
+void SelectWidget::onClick(Button button)
 {
     if (button == Button::right)
     {
@@ -14,7 +14,7 @@ void SelectScreen::onClick(Button button)
     else if (getPlayerStartGrid().getGridPos().isPointInside(getCursor()))
     {
         if(operation.OnClickDown(getCursor(), getPlayerStartGrid()))
-            ChangeScreen(std::make_unique<BattleScreen>(rules,
+            ChangeWidget(std::make_unique<BattleWidget>(rules,
                  std::move(opponent),
                  std::move(getPlayerGrid()),
                  std::move(getOpponentGrid()),
@@ -25,7 +25,7 @@ void SelectScreen::onClick(Button button)
     
 };
 
-void SelectScreen::onClickUp(Button button)
+void SelectWidget::onClickUp(Button button)
 {
     if (button != Button::left)
         return;
@@ -35,7 +35,7 @@ void SelectScreen::onClickUp(Button button)
         operation.OnClickUp(getCursor(), getPlayerStartGrid());
 };
 
-void SelectScreen::RenderVal(PointI pos, VisualBattleGrid& grid, Results res)
+void SelectWidget::RenderVal(PointI pos, VisualBattleGrid& grid, Results res)
 {
     if(res != Results::Clear)
     {
@@ -49,7 +49,7 @@ void SelectScreen::RenderVal(PointI pos, VisualBattleGrid& grid, Results res)
     }
 }
 
-void SelectScreen::onRender()
+void SelectWidget::onRender()
 {
     GetRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
@@ -61,7 +61,7 @@ void SelectScreen::onRender()
         GetRenderTarget()->DrawLine(D2D1::Point2F(position.low.x, position.low.y + i * gridSize.y),
                       D2D1::Point2F(position.high.x, position.low.y + i * gridSize.y), grayBrush);
 
-    ScreenOverlay::onRender();
+    WidgetOverlay::onRender();
 
     //GetRenderTarget()->DrawRectangle(makeD2DRectF(getPlayerGrid().getGridPos()),grayBrush,12);
     
@@ -72,9 +72,9 @@ void SelectScreen::onRender()
     }
 }
 
-void SelectScreen::onResize(RectF newSize)
+void SelectWidget::onResize(RectF newSize)
 {
-    Screen::onResize(newSize);
+    Widget::onResize(newSize);
 
 
     gridSize = position.size().x / 30;
@@ -90,7 +90,7 @@ void SelectScreen::onResize(RectF newSize)
 }
 
 //Shows that player ended selecting ships positions
-bool SelectScreen::DragAndDropShip::OnClickDown(PointF point, VisualGrid& grid)
+bool SelectWidget::DragAndDropShip::OnClickDown(PointF point, VisualGrid& grid)
 {
     auto ship = grid.getIntersectionShip(point);
     if (ship.has_value())
@@ -112,7 +112,7 @@ bool SelectScreen::DragAndDropShip::OnClickDown(PointF point, VisualGrid& grid)
     return false;
 }
 
-void SelectScreen::DragAndDropShip::OnClickUp(PointF point, VisualGrid& grid)
+void SelectWidget::DragAndDropShip::OnClickUp(PointF point, VisualGrid& grid)
 {
     if (!isDown)
         return;
@@ -133,7 +133,7 @@ void SelectScreen::DragAndDropShip::OnClickUp(PointF point, VisualGrid& grid)
     isDown = false;
 }
 
-void SelectScreen::DragAndDropShip::OnUpdate(PointF point)
+void SelectWidget::DragAndDropShip::OnUpdate(PointF point)
 {
     if (!isDown)
         return;
@@ -142,7 +142,7 @@ void SelectScreen::DragAndDropShip::OnUpdate(PointF point)
     grabbedShipGrid->DrawShip(grabbedShip, rect + point - beginPoint);
 }
 
-void SelectScreen::DragAndDropShip::OnRotate()
+void SelectWidget::DragAndDropShip::OnRotate()
 {
     if (!isDown)
         return;

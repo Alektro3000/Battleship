@@ -1,28 +1,28 @@
 #include "Grids/BeginGrid.h"
 #include "Grids/BattleGrid.h"
-#include "../ScreenOverlay.h"
+#include "../WidgetOverlay.h"
 
-#include "../Screen.h"
+#include "../Widget.h"
 
-#ifndef SelectScreenH
-#define SelectScreenH
+#ifndef SelectWidgetH
+#define SelectWidgetH
 
-class SelectScreen final : public ScreenOverlay<VisualBattleGrid, VisualBeginGrid, VisualBattleGrid>
+class SelectWidget final : public WidgetOverlay<VisualBattleGrid, VisualBeginGrid, VisualBattleGrid>
 {
     bool isPlayerTurn;
     GameRules rules;
     std::unique_ptr<Player> opponent;
     VisualBattleGrid& getPlayerGrid()
     {
-        return std::get<0>(_screens);
+        return std::get<0>(_widgets);
     }
     VisualBeginGrid& getPlayerStartGrid()
     {
-        return std::get<1>(_screens);
+        return std::get<1>(_widgets);
     }
     VisualBattleGrid& getOpponentGrid()
     {
-        return std::get<2>(_screens);
+        return std::get<2>(_widgets);
     }
     
     struct DragAndDropShip
@@ -41,9 +41,9 @@ class SelectScreen final : public ScreenOverlay<VisualBattleGrid, VisualBeginGri
     PointF gridSize;
     SolidBrush grayBrush{D2D1::ColorF(D2D1::ColorF::LightGray)};
 public:
-    SelectScreen(GameRules nRules,
+    SelectWidget(GameRules nRules,
                  std::unique_ptr<Player> nOpponent,
-                 bool isPlayerTurn = true) : ScreenOverlay((rules.getSize()),
+                 bool isPlayerTurn = true) : WidgetOverlay((rules.getSize()),
                                              (rules),(rules.getSize())),
                                              isPlayerTurn(isPlayerTurn),
                                              opponent(std::move(nOpponent)), rules(nRules) {

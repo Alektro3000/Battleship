@@ -39,8 +39,24 @@ void PCPlayer::BuildShipLocations()
             shipHits.emplace_back(0);
         }
     auto last = ships.back();
+    if(last.getLength() != 1)
+        return;
     ships.pop_back();
-    int rand = std::abs(int(mt()));
+    
+    int restX = (_rules.getSize().x-x);
+    int restY = (_rules.getSize().y-y -2)* _rules.getSize().x;
+    int possible = restX*2 + restY;
+    
+    int rand = std::abs(int(mt())) % possible;
+    if(rand < restX*2)
+    {
+        ships.emplace_back(PointI(x + rand %restX, y + rand / restX), 1);
+    }
+    else
+    {
+        rand -= restX*2;
+        ships.emplace_back(PointI( rand % _rules.getSize().x, y + rand / _rules.getSize().x), 1);
+    }
     
 }
 

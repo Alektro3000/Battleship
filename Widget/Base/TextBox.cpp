@@ -2,11 +2,11 @@
 
 void TextBox::onResize(RectF newSize)
 {
-    Screen::onResize(newSize);
+    Widget::onResize(newSize);
 }
 void TextBox::onRender()
 {
-    Screen::onRender();
+    Widget::onRender();
     
     GetRenderTarget()->FillRoundedRectangle(D2D1::RoundedRect(makeD2DRectF(position),10,10),backBrush);
     GetRenderTarget()->DrawRoundedRectangle(D2D1::RoundedRect(makeD2DRectF(position),10,10),brush);
