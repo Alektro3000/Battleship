@@ -82,6 +82,12 @@ struct Point
     {
         return {x - right.x, y - right.y};
     };
+    template <typename K>
+        requires requires(T a, K b) { a - b; }
+    constexpr auto operator-(const K &right) const noexcept -> Point<std::decay_t<decltype(x - right)>>
+    {
+        return {x - right, y - right};
+    };
 
     template <typename K>
         requires requires(T a, K b) { a + b; }
@@ -119,14 +125,18 @@ struct Point
         return {y,x};
         
     };
+    constexpr Point rotated(Rotation rot, Point pivot) const noexcept
+        requires requires(T a) { -a; }
+    {
+        return (*this-pivot).rotated(rot)+pivot;
+        
+    };
     constexpr Point<int> sgn() const noexcept
         requires requires(T a) { ::sgn(a); }
     {
         return {::sgn(x),::sgn(y)};
-        
     };
 };
-
 using PointI = Point<int>;
 using PointF = Point<float>;
 #endif

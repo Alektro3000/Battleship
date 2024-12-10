@@ -1,6 +1,6 @@
 #include "PcPlayer.h"
 
-PointI PCPlayer::GetMove()
+PointI PCPlayer::getMove()
 {
     if (target == PointI{-1})
     {
@@ -18,10 +18,10 @@ PointI PCPlayer::GetMove()
         target = PointI{dist / 10, dist % 10};
     }
     counter++;
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     return target;
 }
-void PCPlayer::BuildShipLocations()
+void PCPlayer::buildShipLocations()
 {
     int x = 0;
     int y = 0;
@@ -60,7 +60,21 @@ void PCPlayer::BuildShipLocations()
     
 }
 
-void PCPlayer::ReturnResult(Results res)
+
+std::vector<BattleShip> PCPlayer::showAllShips()
+{
+    return ships;
+}
+BattleShip PCPlayer::showDestroyedShip()
+{
+    return *lastDestroyed;
+}
+
+size_t PCPlayer::getHashGrid()
+{
+    return BattleShip::getHash(ships);
+}
+void PCPlayer::returnResult(Results res)
 {
     playerHits[_rules.flatIndex(target)] = res;
     std::array adj{PointI{1, 0}, PointI{0, 1}, PointI{-1, 0}, PointI{0, -1}};

@@ -2,12 +2,14 @@
 #include <thread>
 #include <numeric>
 #include <random>
+#include <optional>
 
-struct PCPlayer : Player
+struct PCPlayer final : Player
 {
+private:
     GameRules _rules;
     std::vector<BattleShip> ships;
-    std::vector<int> shipHits;
+    std::vector<unsigned int> shipHits;
     std::vector<Results> playerHits;
     int counter = 0;
     std::random_device rd;
@@ -15,12 +17,15 @@ struct PCPlayer : Player
     PointI target{1, 2}; // First Shot
     PointI prevHit{-1};
     bool isWalking = false;
+    std::optional<BattleShip> lastDestroyed;
+    void buildShipLocations();
+public:
     PCPlayer(GameRules rules) : playerHits(rules.getSize().x * rules.getSize().y)
     {
         _rules = rules;
-        BuildShipLocations();
+        buildShipLocations();
     }
-    Results MakeMove(PointI x) override
+    Results makeMove(PointI x) override
     {
         auto damagedShip = std::find_if(ships.begin(), ships.end(),
                                         [x](BattleShip y)
@@ -29,13 +34,13 @@ struct PCPlayer : Player
             return Results::Miss;
         auto i = damagedShip - ships.begin();
         shipHits[i] |= damagedShip->getHitMask(x);
+        if(damagedShip->isDestroyed(shipHits[i]))
+            lastDestroyed = *damagedShip;
         return damagedShip->isDestroyedRes(shipHits[i]);
     }
-    std::vector<BattleShip> ShowShips() override
-    {
-        return ships;
-    }
-    void BuildShipLocations();
-    PointI GetMove() override;
-    void ReturnResult(Results res) override;
+    std::vector<BattleShip> showAllShips() override;
+    BattleShip showDestroyedShip() override;
+    std::size_t getHashGrid() override;
+    PointI getMove() override;
+    void returnResult(Results res) override;
 };

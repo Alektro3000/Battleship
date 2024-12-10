@@ -4,21 +4,7 @@
 #include "DXApp.h"
 #include <windowsx.h>
 
-DXApp* AppPtr;
-void ChangeWidget(std::unique_ptr<IWidget> NewWidget, bool pushToStackPrev)
-{
-    AppPtr->changeWidget(std::move(NewWidget), pushToStackPrev);
-}
-
-PointF getCursor()
-{
-    POINT p;
-    if (!GetCursorPos(&p))
-        throw std::runtime_error("error getting cursor");
-    if(!ScreenToClient(AppPtr->hWnd, &p))
-        throw std::runtime_error("error getting client");
-    return (makePointF(p)) * makePointF(GetRenderTarget()->GetSize()) / makePointF(GetRenderTarget()->GetPixelSize());
-}
+extern DXApp* AppPtr;
 
 // the WindowProc function prototype
 // this is the main message handler for the program
@@ -30,6 +16,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         // this message is read when the window is closed
         case WM_DESTROY:
                 // close the application entirely
+                Context::getInstance().clear();
                 PostQuitMessage(0);
                 return 0;
         case WM_SIZE:
@@ -93,7 +80,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // enter the main loop:
     DXApp App(hWnd);
-    App.changeWidget(std::make_unique<MenuWidget>());
+    App.changeWidget(std::make_unique<widget::Menu>(), false);
     AppPtr = &App;
     // this struct holds Windows event messages
     MSG msg = {0};
@@ -115,13 +102,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
                 break;
             // check to see if it's time to quit
             if(msg.message == WM_LBUTTONDOWN)
-                App.onWinClick(POINT{GET_X_LPARAM(msg.lParam),GET_Y_LPARAM(msg.lParam)}, Button::left);
+                App.onWinClick(POINT{GET_X_LPARAM(msg.lParam),GET_Y_LPARAM(msg.lParam)}, MouseButton::left);
             if(msg.message == WM_LBUTTONUP)
-                App.onWinClickUp(Button::left);
+                App.onWinClickUp(MouseButton::left);
             if(msg.message == WM_RBUTTONDOWN)
-                App.onWinClick(POINT{GET_X_LPARAM(msg.lParam),GET_Y_LPARAM(msg.lParam)}, Button::right);
+                App.onWinClick(POINT{GET_X_LPARAM(msg.lParam),GET_Y_LPARAM(msg.lParam)}, MouseButton::right);
             if(msg.message == WM_RBUTTONUP)
-                App.onWinClickUp(Button::right);
+                App.onWinClickUp(MouseButton::right);
             if(msg.message == WM_CHAR )
                 App.onWinChar(static_cast<wchar_t>(LOWORD(msg.wParam)));
         }

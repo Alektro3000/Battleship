@@ -12,6 +12,9 @@ struct Rect
     constexpr Rect() noexcept
         requires std::default_initializable<T>
     {};
+    constexpr explicit Rect(T val) noexcept: low(Point<T>(val)), high(std::move(Point<T>(val))) {};
+    constexpr explicit Rect(Point<T> val) noexcept: low(val), high(std::move(val)) {};
+    
     constexpr Rect(Point<T> newLow, Point<T> newHigh) noexcept: low(std::move(newLow)), high(std::move(newHigh)) {};
     constexpr Rect(const Rect& newf) noexcept: low(newf.low), high(newf.high) {};
     constexpr Point<T> size() const noexcept { return high - low; };
@@ -121,6 +124,15 @@ struct Rect
     constexpr Rect<T> scaled(const Rect<T> &right) const noexcept
     {
         return (*this) * right.size() + right.low;
+    };
+    constexpr Point<T> center() const noexcept
+    {
+        return (low+high)/2;
+    };
+    constexpr Rect<T> rotated(Rotation rotate) const noexcept
+    {
+        return {(low-center()).rotated(rotate) + center(),
+                (high-center()).rotated(rotate) + center()};
     };
 };
 using RectI = Rect<int>;

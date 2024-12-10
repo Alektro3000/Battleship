@@ -1,37 +1,28 @@
-#include "../WidgetOverlay.h"
+#include "Overlay.h"
 
-#ifndef ButtonWidgetH
-#define ButtonWidgetH
+#ifndef ButtonH
+#define ButtonH
 
-/*
-
-class ButtonWidget final : public Widget 
+namespace widget
 {
-    std::unique_ptr<Widget> child;
-    std::function<void(Button)> callback;
-public:
-    ButtonWidget(std::unique_ptr<Widget> child, std::function<void(Button)> callback):
-        child(std::move(child)), callback(std::move(callback)) {};
-    void onClick(Button button) override
+    template <TWidget Child>
+    class Button final : public Stack<Child>
     {
-        callback(button);
-    }
-    void onResize(RectF newSize) override;
-    void onRender() override;
-};
-*/
+        std::function<void(MouseButton)> callback;
 
-
-template<TWidget Child>
-class ButtonWidget final : public WidgetOverlay<Child> 
-{
-    std::function<void(Button)> callback;
-public:
-    ButtonWidget(Child&& child, auto&& callback):
-        WidgetOverlay<Child>({RectF{{0},{1}},std::move(child)}), callback(std::move(callback)) {};
-    void onClick(Button button) override
-    {
-        callback(button);
-    }
-};
+    public:
+        Button(Child &&child, auto &&callback) : 
+            Stack<Child>(std::move(child)), callback(std::move(callback)) {};
+        Button(Button &&other) = default;
+        Button &operator=(Button &&other) = default;
+        void onClick(MouseButton button) override
+        {
+            callback(button);
+        }
+        Child& getChild()
+        {
+            return std::get<0>(this->_widgets);
+        }
+    };
+}
 #endif

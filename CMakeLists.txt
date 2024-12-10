@@ -14,22 +14,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(BattleCpps BattleWidget.cpp SelectWidget.cpp Grids/BattleGrid.cpp Grids/BeginGrid.cpp Grids/Grid.cpp)
 list(TRANSFORM BattleCpps PREPEND "Battle/")
 
-set(VisualCpps Base.cpp Menu.cpp Net/MakeServer.cpp Net/ListServer.cpp Base/Button.cpp Base/TextBox.cpp  Base/TextEditable.cpp ${BattleCpps}) 
+set(VisualCpps Base.cpp Menu.cpp Net/MakeServer.cpp Net/ListServer.cpp Net/ServerNode.cpp Net/ServerConnections.cpp Base/TextBox.cpp ${BattleCpps}) 
 list(TRANSFORM VisualCpps PREPEND "Widget/")
-set(BaseCpps Players/Player.cpp Players/PcPlayer.cpp DXApp.cpp ${VisualCpps}) 
+set(BaseCpps Players/Player.cpp Players/PcPlayer.cpp Players/BattleShip.cpp DXApp.cpp ${VisualCpps}) 
 
 add_executable(main WIN32 Main.cpp ${BaseCpps})
 
 target_link_libraries(main PRIVATE iphlpapi ws2_32 d2d1.lib dwrite.lib)
 
 include_directories(asio ${Boost_INCLUDE_DIRS})
-add_executable(net Asio.cpp)
-add_executable(net2 AsioServer.cpp)
-
-target_link_libraries(net ${Boost_LIBRARIES})
-target_link_libraries(net iphlpapi ws2_32)
-target_link_libraries(net2 ${Boost_LIBRARIES})
-target_link_libraries(net2 iphlpapi ws2_32)
 
 
 add_executable(tests Testing/Point.cpp ${BaseCpps})

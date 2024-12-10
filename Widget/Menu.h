@@ -1,14 +1,18 @@
-#include "Base/Button.h"
-#include "Base/TextBox.h"
-#include "WidgetOverlay.h"
+#include "Base/Builder.h"
 
 #ifndef MenuWidgetH
 #define MenuWidgetH
 
-class MenuWidget : public WidgetOverlay<ButtonWidget<TextBox>, ButtonWidget<TextBox> >
+namespace widget
 {
-public:
-    MenuWidget();
-    void onRender() override;
+    class Menu : public Overlay<Button<Padder<TextBox>>,
+                                            Button<Padder<TextBox>>,
+                                            Button<Padder<TextBox>>>
+    {
+    public:
+        Menu();
+        void onRender() override;
+    };
 };
+
 #endif

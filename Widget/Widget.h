@@ -8,57 +8,54 @@
 
 #ifndef WidgetH
 #define WidgetH
-enum class Button
+
+namespace widget
 {
-    left,
-    right,
-};
 class IWidget
 {
-public:
-    virtual void onResize(RectF newSize) {};
-    virtual void onRender() {};
-    virtual void onClick(Button button) {};
-    virtual void onClickUp(Button button) {};
-    virtual void onChar(WCHAR letter) {};
-    virtual ~IWidget() {};
-};
+    public:
+        virtual void onResize(RectF newSize) {};
+        virtual void onRender() {};
+        virtual void onClick(MouseButton button) {};
+        virtual void onClickUp(MouseButton button) {};
+        virtual void onChar(WCHAR letter) {};
+        virtual ~IWidget() {};
+    };
 
-void ChangeWidget(std::unique_ptr<IWidget> NewWidget, bool pushToStackPrev = true);
+    void ChangeWidget(std::unique_ptr<IWidget> NewWidget, bool pushToStackPrev = true);
 
-PointF getCursor();
+    template <typename T>
+    concept TWidget = std::derived_from<T, IWidget>;
 
-template<typename T>
-concept TWidget = std::derived_from<T, IWidget>;
-
-class Widget : public IWidget
-{
-protected:
-    RectF position;
-
-public:
-    RectF getPosition()
+    class Widget : public IWidget
     {
-        return position;
-    }
-    virtual void onResize(RectF newSize) override { position = newSize; };
-    bool tryClick(Button button)
-    {
-        if (position.isPointInsideExcl(getCursor()))
+    protected:
+        RectF position;
+
+    public:
+        RectF getPosition()
         {
-            onClick(button);
-            return true;
+            return position;
         }
-        return false;
-    }
-    bool tryClickUp(Button button)
-    {
-        if (position.isPointInsideExcl(getCursor()))
+        virtual void onResize(RectF newSize) override { position = newSize; };
+        bool tryClick(MouseButton button)
         {
-            onClickUp(button);
-            return true;
+            if (position.isPointInsideExcl(Context::getInstance().getCursor()))
+            {
+                onClick(button);
+                return true;
+            }
+            return false;
         }
-        return false;
-    }
-};
+        bool tryClickUp(MouseButton button)
+        {
+            if (position.isPointInsideExcl(Context::getInstance().getCursor()))
+            {
+                onClickUp(button);
+                return true;
+            }
+            return false;
+        }
+    };
+}
 #endif

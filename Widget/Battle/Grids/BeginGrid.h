@@ -3,19 +3,23 @@
 #ifndef VisualBeginGridH
 #define VisualBeginGridH
 
-struct VisualBeginGrid final : VisualGrid
+namespace widget
 {
-    VisualBeginGrid(GameRules rules);
-    std::optional<BattleShip> getIntersectionShipCoord(PointI point)const override;
 
-    void removeShip(BattleShip ship) override;
-    void addShip(BattleShip ship) override;
-    bool canShipBeAdded(BattleShip ship) const override;
-    void onRender()  override;
+    struct VisualBeginGrid final : VisualGrid
+    {
+        VisualBeginGrid(GameRules rules);
+        std::optional<BattleShip> getIntersectionShipCoord(PointI point) const override;
 
-    bool isButtonBegin(PointF coords);
-    
-private:
-    std::vector<std::pair<BattleShip, int> > ships;
-};
+        void removeShip(BattleShip ship) override;
+        void addShip(BattleShip ship) override;
+        bool canShipBeAdded(BattleShip ship) const override;
+        void onRender() override;
+
+        bool isButtonBegin(PointF coords);
+
+    private:
+        std::vector<std::pair<BattleShip, int>> ships;
+    };
+}
 #endif
