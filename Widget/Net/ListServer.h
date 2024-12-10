@@ -17,7 +17,7 @@ namespace widget
     private:
         std::future<std::vector<ResponseFull>> quering;
         bool isUpdating = false;
-        boost::asio::io_context context;
+        std::atomic<boost::asio::io_context*> contextPointer = nullptr; //Needed for faster shutting down
         std::atomic<bool> isFutureReady = false;
         SolidBrush brush{D2D1::ColorF(0)};
         SolidBrush halfOpacity{D2D1::ColorF(D2D1::ColorF::LightGray, 0.5f)};
@@ -26,9 +26,16 @@ namespace widget
 
     public:
         ServerList();
+        ServerList(const ServerList&) = delete;
+        ServerList& operator=(const ServerList&) = delete;
         void onResize(RectF newSize) override;
         void onRender() override;
         void updateServers();
+        ~ServerList()
+        {
+            if(contextPointer)
+                (contextPointer.load())->stop();
+        }
     };
 }
 #endif

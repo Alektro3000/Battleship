@@ -23,10 +23,8 @@ namespace widget
         boost::asio::io_context context;
         boost::asio::ip::udp::socket val(context, udp::v4());
         val.send_to(boost::asio::buffer(connectMessage), udp::endpoint(info.ipv4, port));
-        context.run();
         
         boost::asio::ip::tcp::socket sock(context, tcp::endpoint(info.ipv4, port));
-        context.run();
         
         GameRules rules{};
         boost::system::error_code err;

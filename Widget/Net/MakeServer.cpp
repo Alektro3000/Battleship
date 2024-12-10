@@ -13,8 +13,12 @@ namespace widget
         auto str = text.getChild().getText();
         server = std::jthread([str, this](std::stop_token token)
                               {
-        auto holder = ServerHolder(context, token, str);
-        context.run(); });
+            boost::asio::io_context context;
+            contextPointer = &context;
+            ServerHolder holder = ServerHolder(context, token, str);
+            boost::system::error_code err;
+            context.run(err);
+            contextPointer = nullptr; }); // TODO - make ignorance of error caused destroying io_context
     }
     void MakeServer::onResize(RectF newSize)
     {

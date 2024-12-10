@@ -1,7 +1,6 @@
 #include "../Widget.h"
 #include "../Base/Builder.h"
-#include <boost/asio/io_context.hpp>
-
+#include "ServerConnections.h"
 #ifndef WidgetSelectMakeServerH
 #define WidgetSelectMakeServerH
 
@@ -19,17 +18,24 @@ namespace widget
     constexpr static RectF TextBegin = {{0.05, 0.4}, {0.4, 0.48}};
     constexpr static RectF ButtonPos = {{0.8, 0.88}, {0.98, 0.99}};
     std::jthread server;
-    class boost::asio::io_context context;
+    std::atomic<boost::asio::io_context*> contextPointer = nullptr; //Needed for faster shutting down
     bool isServerEnabled = false;
 
   public:
     MakeServer() : Overlay({ButtonPos,
                                     Button{TextBox(L"Создать сервер", 40), [this](auto _)
                                                  { makeServer(); }}}) {};
+    MakeServer(const MakeServer&) = delete;
+    MakeServer& operator=(const MakeServer&) = delete;
     void onChar(WCHAR letter) override;
     void onResize(RectF newSize) override;
     void onRender() override;
     void makeServer();
+    ~MakeServer()
+    {
+      if(contextPointer)
+        (contextPointer.load())->stop();
+    }
   };
 }
 #endif

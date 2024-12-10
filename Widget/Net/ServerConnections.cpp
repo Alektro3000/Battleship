@@ -74,7 +74,10 @@ namespace widget
     socket.set_option(boost::asio::socket_base::broadcast(false));
 
     ResponseCollector val(io_context, socket);
-    io_context.run();
+    boost::system::error_code ignoredError;
+    io_context.run(ignoredError);
+    if(ignoredError)
+      return {};
     return val.responses;
   }
 

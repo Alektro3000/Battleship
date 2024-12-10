@@ -34,7 +34,13 @@ namespace widget
             isUpdating = true;
             isFutureReady = false;
             quering = std::async(std::launch::async, [this]()
-                                 {auto a = queryServers(context); isFutureReady = true; return a; });
+                                 {
+                                    boost::asio::io_context io_context;
+                                    contextPointer = &io_context;
+                                    auto a = queryServers(io_context); 
+                                    isFutureReady = true;
+                                    contextPointer = nullptr; 
+                                    return a; });
         }
     }
     void ServerList::onResize(RectF newSize)

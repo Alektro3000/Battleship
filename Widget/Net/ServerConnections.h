@@ -1,4 +1,4 @@
-#define BOOST_ASIO_ENABLE_HANDLER_TRACKING 1
+//#define BOOST_ASIO_ENABLE_HANDLER_TRACKING 1
 #define UNICODE
 #include <boost/asio.hpp>
 #include <iostream>
@@ -80,10 +80,10 @@ namespace widget
         deadline_.expires_at(boost::posix_time::pos_infin);
       }
     }
+    boost::asio::deadline_timer deadline_;
     udp::socket &socket_;
     udp::endpoint remote_endpoint_;
     std::array<Response, 2> recv_buffer_;
-    boost::asio::deadline_timer deadline_;
   };
 
   std::vector<ResponseFull> queryServers(boost::asio::io_context&);
@@ -107,7 +107,7 @@ namespace widget
           remote_endpoint_,
           [this](auto error, auto bytes)
           { handleReceive(error, bytes); });
-      deadline_.expires_from_now(boost::posix_time::millisec(10000));
+      deadline_.expires_from_now(boost::posix_time::millisec(1000));
       deadline_.async_wait([this](const auto &error)
                            { checkDeadline(); });
     }
