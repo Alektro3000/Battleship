@@ -70,8 +70,9 @@ struct Context
 
 struct SolidBrush
 {
-    ID2D1SolidColorBrush *brush;
-    SolidBrush(D2D1::ColorF color = D2D1::ColorF(0));
+    ID2D1SolidColorBrush *brush = nullptr;
+    SolidBrush(){};
+    SolidBrush(D2D1::ColorF color);
     SolidBrush(const SolidBrush &) = delete;
     SolidBrush &operator=(const SolidBrush &) = delete;
 

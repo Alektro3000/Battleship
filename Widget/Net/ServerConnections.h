@@ -1,4 +1,4 @@
-#define BOOST_ASIO_ENABLE_HANDLER_TRACKING
+//#define BOOST_ASIO_ENABLE_HANDLER_TRACKING
 #define UNICODE
 #include <boost/asio.hpp>
 #include <iostream>
@@ -13,7 +13,8 @@ namespace widget
 {
   constexpr const char fetchMessage[] = "Finding server for Battleship";
   constexpr const char connectMessage[] = "Connecting to Battleship server";
-  constexpr const boost::asio::ip::port_type port = 3190;
+  constexpr const boost::asio::ip::port_type serverPort = 3190;
+  constexpr const boost::asio::ip::port_type clientPort = 3191;
 
   using boost::asio::ip::tcp;
   using boost::asio::ip::udp;
@@ -32,6 +33,7 @@ namespace widget
   {
     Response response;
     boost::asio::ip::address_v4 ipv4;
+    boost::asio::ip::address_v4 ipLocal;
   };
 
 }

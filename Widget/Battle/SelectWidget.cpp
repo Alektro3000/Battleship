@@ -1,13 +1,49 @@
 #include "SelectWidget.h"
 #include "BattleWidget.h"
+#include "../Base/Builder.h"
 #include <thread>
 
 namespace widget
 {
-
+    SelectWidget::SelectWidget(GameRules nRules,
+                               std::unique_ptr<Player> nOpponent,
+                               bool isPlayerTurn) : Overlay((rules.getSize()),
+                                                            (rules), (rules.getSize()),
+                                                            Builder::makeText(L"Авто")
+                                                                .addPadding()
+                                                                .setBorder()
+                                                                .addButton([this](auto _)
+                                                                           { autoSelect(); })
+                                                                .build()),
+                                                    isPlayerTurn(isPlayerTurn),
+                                                    opponent(std::move(nOpponent)), rules(nRules) {
+                                                    };
+    void SelectWidget::autoSelect()
+    {
+        for (auto &q : getPlayerStartGrid())
+        {
+            for (int ship = 0; ship < q.second; ship++)
+            {
+                bool fl = true;
+                for (int i = 0; i < rules.getSize().x && fl; i++)
+                    for (int j = 0; j <= rules.getSize().y - q.first.getLength() && fl; j++)
+                    {
+                        auto locationShip = BattleShip(PointI(i, j), q.first.getLength());
+                        if (getPlayerGrid().canShipBeAdded(locationShip))
+                        {
+                            getPlayerGrid().addShip(locationShip);
+                            q.second--;
+                            if (q.second <= 0)
+                                fl = false;
+                        }
+                    }
+            }
+        }
+    }
     void SelectWidget::onClick(MouseButton button)
     {
         auto cursor = Context::getInstance().getCursor();
+        getAutoButton().tryClick(button);
         if (button == MouseButton::right)
         {
             operation.OnRotate(cursor);
@@ -39,20 +75,6 @@ namespace widget
         else
             operation.OnClickUp(Context::getInstance().getCursor());
     };
-
-    void SelectWidget::RenderVal(PointI pos, VisualBattleGrid &grid, Results res)
-    {
-        if (res != Results::Clear)
-        {
-            if (res == Results::Hit)
-                grayBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
-            if (res == Results::Destroy)
-                grayBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::DarkRed));
-            Context::getInstance().getRenderTarget()->FillEllipse(D2D1::Ellipse(makeD2DPointF(grid.getCoordPosition(pos) + grid.getGridSize() / 2), 10, 10), grayBrush);
-
-            grayBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::LightGray));
-        }
-    }
 
     void SelectWidget::onRender()
     {
@@ -89,6 +111,9 @@ namespace widget
 
         auto gridBeginOffset = gridSize * Point{2, 12};
         getPlayerStartGrid().onResize({gridBeginOffset, gridBeginOffset + gridSize * (getPlayerStartGrid().getSize() + 1)});
+
+        auto autoBeginOffset = gridSize * Point{2, 10};
+        getAutoButton().onResize({gridBeginOffset, gridBeginOffset + gridSize * PointI{3, 1}});
     }
 
     // Shows that player ended selecting ships positions

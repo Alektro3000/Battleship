@@ -30,7 +30,7 @@ namespace widget
     }
     void VisualBattleGrid::RenderVal(PointI pos, Results res)
     {
-        auto ellipse = D2D1::Ellipse(makeD2DPointF(getCoordPosition(pos) + getGridSize() / 2), 10, 10);
+        auto ellipse = D2D1::Ellipse(makeD2DPointF(getCoordPosition(pos) + getGridSize() / 2),  getGridSize().x / 4,  getGridSize().y / 4);
         if (res == Results::Miss)
             Context::getInstance().getRenderTarget()->FillEllipse(ellipse, grayBrush);
         else if (res != Results::Clear)

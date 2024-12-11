@@ -18,6 +18,8 @@ namespace widget
 
         bool isButtonBegin(PointF coords);
 
+        auto begin() noexcept { return ships.begin(); }
+        auto end() noexcept { return ships.end(); }
     private:
         std::vector<std::pair<BattleShip, int>> ships;
     };

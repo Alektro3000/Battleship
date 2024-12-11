@@ -1,6 +1,6 @@
 #include "Grids/BeginGrid.h"
 #include "Grids/BattleGrid.h"
-#include "../Base/Overlay.h"
+#include "../Base/Builder.h"
 
 #include "../Widget.h"
 
@@ -11,7 +11,8 @@ namespace widget
 {
     class SelectWidget final : public Overlay<VisualBattleGrid,
                                                     VisualBeginGrid,
-                                                    VisualBattleGrid>
+                                                    VisualBattleGrid,
+                                                    Button<Padder<TextBox>>>
     {
         bool isPlayerTurn;
         GameRules rules;
@@ -27,6 +28,10 @@ namespace widget
         VisualBattleGrid &getOpponentGrid()
         {
             return getWidget<2>();
+        }
+        auto& getAutoButton()
+        {
+            return getWidget<3>();
         }
 
         struct DragAndDropShip
@@ -50,16 +55,12 @@ namespace widget
     public:
         SelectWidget(GameRules nRules,
                      std::unique_ptr<Player> nOpponent,
-                     bool isPlayerTurn = true) : Overlay((rules.getSize()),
-                                                               (rules), (rules.getSize())),
-                                                 isPlayerTurn(isPlayerTurn),
-                                                 opponent(std::move(nOpponent)), rules(nRules) {
-                                                 };
+                     bool isPlayerTurn = true);
         void onClick(MouseButton button) override;
         void onClickUp(MouseButton button) override;
         void onResize(RectF newSize) override;
         void onRender() override;
-        void RenderVal(PointI pos, VisualBattleGrid &grid, Results res);
+        void autoSelect();
     };
 }
 #endif

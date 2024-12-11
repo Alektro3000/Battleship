@@ -8,13 +8,13 @@ namespace widget
     class ServerHolder
     {
     public:
-        boost::asio::ip::address_v4 getAddress()
+        boost::asio::ip::tcp::socket getSocket() &&
         {
-            return fetchEndpoint.address().to_v4();
+            return std::move(connectSocket);
         }
         ServerHolder(boost::asio::io_context &context, std::wstring name, GameRules rules)
-            : fetchSocket(context, udp::endpoint(udp::v4(), port)),
-              connectAcceptor(context, tcp::endpoint(tcp::v4(), port)),
+            : fetchSocket(context, udp::endpoint(udp::v4(), serverPort)),
+              connectAcceptor(context, tcp::endpoint(tcp::v4(), serverPort)),
               connectSocket(context),
               rules(rules), name(name)
         {
@@ -58,12 +58,11 @@ namespace widget
         {
             if (error)
             {
-                startAccept();
                 return;
             }
             // Connecting
-            boost::asio::async_read(connectSocket, boost::asio::buffer(connectBuffer), [this](auto err, auto len)
-                                          {
+            boost::asio::async_read(connectSocket, boost::asio::buffer(connectBuffer, sizeof(connectMessage)), [this](auto err, auto len)
+                                    {
                     if(err)
                     {
                         startAccept();
@@ -71,8 +70,13 @@ namespace widget
                     }
                     if(std::equal(std::begin(connectMessage), std::end(connectMessage), connectBuffer.begin()))
                     {
-                        boost::asio::async_write(connectSocket, boost::asio::buffer(&rules,sizeof(GameRules)),[](auto err, auto len){
-                            
+                        boost::asio::async_write(connectSocket, 
+                            boost::asio::buffer(&rules,sizeof(GameRules)),
+                            [this](auto err, auto len){
+                            fetchSocket.cancel();
+                            fetchSocket.close();
+
+
                         });
                     } });
         }
@@ -95,16 +99,16 @@ namespace widget
             return;
         isServerEnabled = true;
         auto str = text.getChild().getText();
-        server = std::async(std::launch::async, [str, this]()
+        server = std::async(std::launch::async, [str, this]() -> std::pair<tcp::socket, std::unique_ptr<boost::asio::io_context> >
                             {
-                boost::asio::io_context context;
-                contextPointer = &context;
-                ServerHolder holder = ServerHolder(context, str, rules);
+                auto context = std::make_unique<boost::asio::io_context>();
+                contextPointer = &(*context);
+                ServerHolder holder = ServerHolder(*context, str, rules);
                 boost::system::error_code err;
-                context.run(err);
+                context->run(err);
                 contextPointer = nullptr;
                 isFutureReady = true;
-                return holder.getAddress(); });
+                return std::pair(std::move(holder).getSocket(), std::move(context));  });
     }
     void MakeServer::onResize(RectF newSize)
     {
@@ -127,10 +131,9 @@ namespace widget
 
         if (isFutureReady)
         {
-            boost::asio::ip::address_v4 ip = server.get();
+            auto ip = server.get();
             ChangeWidget(std::make_unique<SelectWidget>(rules,
-                                                        std::make_unique<NetPlayer>(rules, ip, true),
-                                                        false),
+                                                        std::make_unique<NetPlayer>(rules, std::move(ip.first), std::move(ip.second),true), rules.isFirstAttacking()),
                          false);
         }
     }

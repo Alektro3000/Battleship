@@ -37,8 +37,7 @@ namespace widget {
 
             Stack<Child>::onRender();
 
-            auto opacity = borderColor.brush->GetOpacity();
-            if(borderColor && opacity > 0.f)
+            if(borderColor && borderColor.brush->GetOpacity() > 0.f)
                 Context::getInstance().getRenderTarget()->DrawRoundedRectangle(
                     D2D1::RoundedRect(makeD2DRectF(Widget::position),borderRadius,borderRadius),borderColor);
         }

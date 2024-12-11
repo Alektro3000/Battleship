@@ -1,21 +1,30 @@
 #include "NetPlayer.h"
+#include <boost/asio.hpp>
 
-NetPlayer::NetPlayer(GameRules rules, boost::asio::ip::address_v4 ip, bool server) {
+using boost::asio::write;
+using boost::asio::buffer;
+
+NetPlayer::NetPlayer(GameRules rules, boost::asio::ip::tcp::socket&& socket, contextPtr&& context, bool server):
+ socket(std::move(socket)), context(std::move(context)) {
 
 };
 AttResult NetPlayer::makeMove(PointI x) {
-    return AttResult{Results::Miss};
+    write(socket, buffer(&x,sizeof(PointI)));
+    AttResult res{Results::Miss};
+    read(socket, buffer(&res, sizeof(AttResult)));
+    return res;
 };
 std::vector<BattleShip> NetPlayer::showAllShips() {
     return {};
 };
 std::size_t NetPlayer::getHashGrid() {
     return 0;
-
 };
 PointI NetPlayer::getMove() {
-    return {};
+    PointI res;
+    read(socket, buffer(&res, sizeof(PointI)));
+    return res;
 };
 void NetPlayer::returnResult(AttResult res) {
-
+    write(socket, buffer(&res,sizeof(AttResult)));
 };

@@ -20,13 +20,16 @@ namespace widget
                                                                                                 .addPadding()
                                                                                                 .build()})
                                                         .addPadding()
+                                                        .setBorder()
                                                         .build()) {};
     void ServerNode::onClick(MouseButton button) {
         
-        boost::asio::io_context context;
-        boost::asio::ip::tcp::socket sock(context, tcp::endpoint(info.ipv4, port));
+        auto context = std::make_unique<boost::asio::io_context>();
+        boost::asio::ip::tcp::socket socket(*context, tcp::v4());
+        socket.bind(tcp::endpoint(info.ipLocal, clientPort));
+        socket.connect(tcp::endpoint(info.ipv4, serverPort));
         boost::system::error_code err;
-        boost::asio::write(sock, boost::asio::buffer(connectMessage),err);
+        boost::asio::write(socket, boost::asio::buffer(connectMessage),err);
         
         if(err)
         {
@@ -37,7 +40,7 @@ namespace widget
         GameRules rules{};
         
         boost::system::error_code errc;
-        boost::asio::read(sock,boost::asio::buffer(&rules, sizeof(rules)),errc);
+        boost::asio::read(socket,boost::asio::buffer(&rules, sizeof(rules)),errc);
         
         if(errc)
         {
@@ -46,8 +49,8 @@ namespace widget
         }
         
         ChangeWidget(std::make_unique<SelectWidget>(rules,
-                     std::make_unique<NetPlayer>(rules, info.ipv4, true),
-                     false));
+                     std::make_unique<NetPlayer>(rules, std::move(socket), std::move(context), false),!rules.isFirstAttacking()),
+                     false);
     };
     void ServerNode::onErrorConnection()
     {

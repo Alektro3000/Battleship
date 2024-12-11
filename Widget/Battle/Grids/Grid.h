@@ -12,7 +12,7 @@ namespace widget
     {
     protected:
         PointI size;
-        SolidBrush blackBrush;
+        SolidBrush blackBrush{D2D1::ColorF(0,1)};
         TextFormat format = {40};
 
     public:

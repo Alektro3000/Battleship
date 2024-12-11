@@ -15,44 +15,48 @@ namespace widget
         std::vector<ResponseFull> responses;
         ResponseCollector(boost::asio::io_context &io_context, udp::socket &socket)
             : socket_(socket),
-              deadline_(io_context)
+              deadline_(io_context, boost::posix_time::seconds(1))
         {
             startReceive();
+            deadline_.async_wait([this](const auto &error)
+                                 { checkDeadline(error); });
         }
 
     private:
         void startReceive()
         {
-            deadline_.expires_from_now(boost::posix_time::seconds(1));
             socket_.async_receive_from(
                 boost::asio::buffer(recv_buffer_),
                 remote_endpoint_,
                 [this](auto error, auto bytes)
                 { handleReceive(error, bytes); });
-            deadline_.async_wait([this](const auto &error)
-                                 { checkDeadline(); });
         }
 
         void handleReceive(const boost::system::error_code &error, std::size_t bytes_transferred)
         {
-            if (!error)
-            {
-                //If it's not from us
-                if(!(remote_endpoint_.address() == socket_.local_endpoint().address() && bytes_transferred != sizeof(Response)))
-                    responses.push_back({recv_buffer_[0], remote_endpoint_.address().to_v4()});
-                // Ready to receive next packet
-                startReceive();
-            }
+            if (error)
+                return;
+
+            // If it's not from us
+            if (!(remote_endpoint_.address() == socket_.local_endpoint().address() && bytes_transferred != sizeof(Response)))
+                responses.push_back({
+                    recv_buffer_[0],
+                    remote_endpoint_.address().to_v4(),
+                    socket_.local_endpoint().address().to_v4(),
+                });
+            // Ready to receive next packet
+            startReceive();
         }
-        void checkDeadline()
+        void checkDeadline(const boost::system::error_code &error)
         {
+            if(error)
+                return;
             // Check for false invocation
             if (deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now())
             {
                 socket_.cancel();
                 socket_.close();
                 // Disable timer
-                deadline_.expires_at(boost::posix_time::pos_infin);
                 deadline_.cancel();
             }
         }
@@ -121,16 +125,16 @@ namespace widget
     std::vector<ResponseFull> queryServers(netIps ip)
     {
         boost::asio::io_context io_context;
-        udp::socket socket(io_context,udp::endpoint(ip.ip, port) );
+        udp::socket socket(io_context,udp::endpoint(ip.ip, clientPort) );
 
         socket.set_option(boost::asio::socket_base::broadcast(true));
-        udp::endpoint senderEndpoint(ip.broadcast, port);
+        udp::endpoint senderEndpoint(ip.broadcast, serverPort);
         boost::system::error_code err;
-        socket.send_to(boost::asio::buffer(fetchMessage), senderEndpoint,{},err);
-        if(err)
+        socket.send_to(boost::asio::buffer(fetchMessage), senderEndpoint, {}, err);
+        if (err)
         {
-            std::cerr<<err.to_string()<< " Error failed to send to "<< ip.broadcast.to_string() << std::endl;
-            //If failed to send broadcast message there is no need to wait for response
+            std::cerr << err.to_string() << " Error failed to send to " << ip.broadcast.to_string() << std::endl;
+            // If failed to send broadcast message there is no need to wait for response
             return {};
         }
 
@@ -236,9 +240,9 @@ namespace widget
             Context::getInstance().getRenderTarget()->FillRectangle(makeD2DRectF(RectF{{0.1, 0.1}, {0.9, 0.9}}.scaled(position)), halfOpacity);
         }
     }
-        ServerList::~ServerList()
-        {
-            if(contextPointer)
-                (contextPointer.load())->stop();
-        }
+    ServerList::~ServerList()
+    {
+        if (contextPointer)
+            (contextPointer.load())->stop();
+    }
 }

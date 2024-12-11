@@ -18,7 +18,7 @@ namespace widget
     decltype(editableText()) text = editableText();
     constexpr static RectF TextBegin = {{0.05, 0.4}, {0.4, 0.48}};
     constexpr static RectF ButtonPos = {{0.7, 0.88}, {0.98, 0.99}};
-    std::future<boost::asio::ip::address_v4> server;
+    std::future<std::pair<tcp::socket, std::unique_ptr<boost::asio::io_context> > > server;
     GameRules rules;
     std::atomic<bool> isFutureReady = false;
     std::atomic<boost::asio::io_context*> contextPointer = nullptr; //Needed for faster shutting down
