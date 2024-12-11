@@ -15,6 +15,7 @@ namespace widget
 
     public:
         ServerNode(ResponseFull info);
+        void onErrorConnection();
         void onClick(MouseButton button) override;
     };
 }

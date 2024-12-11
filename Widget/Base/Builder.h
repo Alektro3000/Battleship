@@ -32,6 +32,11 @@ namespace widget
                 _state.setBorder(color, width, radius);
                 return std::move(*this);
             };
+            BuildingWidget setEditableText() &&
+            {
+                _state.isEditable = true;
+                return std::move(*this);
+            };
 
             BuildingWidget<Button<T>> addButton(auto &&callback) &&
             {

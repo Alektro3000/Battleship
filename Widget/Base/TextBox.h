@@ -13,9 +13,9 @@ namespace widget
         SolidBrush brush;
         int size;
         std::wstring string;
-        bool isEditable = false;
 
     public:
+        bool isEditable = false;
         TextBox(std::wstring str, int size = -1, D2D1::ColorF color = D2D1::ColorF(0, 1)) : string(std::move(str)), size(size), brush(color), format(size) {};
         void onResize(RectF newSize) override;
         void onRender() override;

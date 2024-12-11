@@ -10,14 +10,14 @@ namespace widget
 
   inline auto editableText()
   {
-    return Builder::makeText(L"1").addButton([](auto _) {}).build();
+    return Builder::makeText(L"1").setEditableText().addButton([](auto _) {}).build();
   }
 
   class MakeServer : public Overlay<Button<TextBox>>
   {
     decltype(editableText()) text = editableText();
     constexpr static RectF TextBegin = {{0.05, 0.4}, {0.4, 0.48}};
-    constexpr static RectF ButtonPos = {{0.8, 0.88}, {0.98, 0.99}};
+    constexpr static RectF ButtonPos = {{0.7, 0.88}, {0.98, 0.99}};
     std::future<boost::asio::ip::address_v4> server;
     GameRules rules;
     std::atomic<bool> isFutureReady = false;
@@ -26,7 +26,7 @@ namespace widget
 
   public:
     MakeServer() : Overlay({ButtonPos,
-                                    Button{TextBox(L"Создать сервер", 40), [this](auto _)
+                                    Button{TextBox(L"Создать сервер"), [this](auto _)
                                                  { makeServer(); }}}) {};
     MakeServer(const MakeServer&) = delete;
     MakeServer& operator=(const MakeServer&) = delete;

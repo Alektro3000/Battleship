@@ -31,11 +31,7 @@ namespace widget
         void onResize(RectF newSize) override;
         void onRender() override;
         void updateServers();
-        ~ServerList()
-        {
-            if(contextPointer)
-                (contextPointer.load())->stop();
-        }
+        ~ServerList();
     };
 }
 #endif

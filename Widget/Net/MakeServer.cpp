@@ -10,68 +10,79 @@ namespace widget
     public:
         boost::asio::ip::address_v4 getAddress()
         {
-            return queryEndpoint.address().to_v4();
+            return fetchEndpoint.address().to_v4();
         }
         ServerHolder(boost::asio::io_context &context, std::wstring name, GameRules rules)
-            : querySocket(context, udp::endpoint(udp::v4(), port)),
-              connectSocket(context, tcp::endpoint(tcp::v4(), port)),
+            : fetchSocket(context, udp::endpoint(udp::v4(), port)),
+              connectAcceptor(context, tcp::endpoint(tcp::v4(), port)),
+              connectSocket(context),
               rules(rules), name(name)
         {
-            querySocket.async_receive_from(
-                boost::asio::buffer(queryBuffer),
-                queryEndpoint,
-                [this](auto error, auto bytes)
-                { handleQuery(error, bytes); });
-
-
-            connectSocket.async_read_some(
-                boost::asio::buffer(connectBuffer),
-                connectEndpoint,
-                [this](auto error, auto bytes)
-                { handleConnect(error, bytes); });
+            startFetch();
+            startAccept();
         }
 
     private:
-        void handleQuery(const boost::system::error_code &error, std::size_t bytesTransferred)
+        void startAccept()
         {
-            if (!error)
-            {
-                // Fetching
-                if (std::equal(std::begin(fetchMessage), std::end(fetchMessage), queryBuffer.begin()))
-                {
-                    Response val;
-                    std::copy(name.begin(), name.end(), val.name.begin());
-                    val.len = name.size();
-                    querySocket.async_send_to(boost::asio::buffer(&val, sizeof(Response)), queryEndpoint,
-                                              [](auto val, auto val1) {});
-                }
-                // Ready to receive next packet
-                querySocket.async_receive_from(
-                    boost::asio::buffer(queryBuffer),
-                    queryEndpoint,
-                    [this](auto error, auto bytes)
-                    { handleQuery(error, bytes); });
-            }
+            connectAcceptor.async_accept(connectSocket, [this](auto error)
+                                         { handleConnect(error); });
         }
-        void handleConnect(const boost::system::error_code &error, std::size_t bytesTransferred)
+        void startFetch()
         {
-            if (!error)
+            fetchSocket.async_receive_from(
+                boost::asio::buffer(fetchBuffer),
+                fetchEndpoint,
+                [this](auto error, auto bytes)
+                { handleFetch(error, bytes); });
+        }
+        void handleFetch(const boost::system::error_code &error, std::size_t bytesTransferred)
+        {
+            if (error)
+                return;
+
+            // Fetching
+            if (std::equal(std::begin(fetchMessage), std::end(fetchMessage), fetchBuffer.begin()))
             {
-                // Connecting
-                if (std::equal(std::begin(connectMessage), std::end(connectMessage), connectBuffer.begin()))
-                {
-                    boost::asio::async_write(connectSocket, boost::asio::buffer(&rules, sizeof(GameRules)),
-                                                [](auto val, auto val1) {});
-                }
+                Response val;
+                std::copy(name.begin(), name.end(), val.name.begin());
+                val.len = name.size();
+                fetchSocket.async_send_to(boost::asio::buffer(&val, sizeof(Response)), fetchEndpoint,
+                                          [](auto val, auto val1) {});
             }
+            // Ready to receive next packet
+            startFetch();
         }
 
-        udp::socket querySocket;
-        udp::endpoint queryEndpoint;
-        std::array<char, 40> queryBuffer;
+        void handleConnect(const boost::system::error_code &error)
+        {
+            if (error)
+            {
+                startAccept();
+                return;
+            }
+            // Connecting
+            boost::asio::async_read(connectSocket, boost::asio::buffer(connectBuffer), [this](auto err, auto len)
+                                          {
+                    if(err)
+                    {
+                        startAccept();
+                        return;
+                    }
+                    if(std::equal(std::begin(connectMessage), std::end(connectMessage), connectBuffer.begin()))
+                    {
+                        boost::asio::async_write(connectSocket, boost::asio::buffer(&rules,sizeof(GameRules)),[](auto err, auto len){
+                            
+                        });
+                    } });
+        }
 
+        udp::socket fetchSocket;
+        udp::endpoint fetchEndpoint;
+        std::array<char, 40> fetchBuffer;
+
+        tcp::acceptor connectAcceptor;
         tcp::socket connectSocket;
-        tcp::endpoint connectEndpoint;
         std::array<char, 40> connectBuffer;
 
         std::wstring name;
@@ -119,7 +130,8 @@ namespace widget
             boost::asio::ip::address_v4 ip = server.get();
             ChangeWidget(std::make_unique<SelectWidget>(rules,
                                                         std::make_unique<NetPlayer>(rules, ip, true),
-                                                        false));
+                                                        false),
+                         false);
         }
     }
 }
