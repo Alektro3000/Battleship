@@ -53,11 +53,10 @@ bool BattleShip::hasIntersectionCorner(BattleShip other) const noexcept
         return hasher(std::bit_cast<int>(b));
     }
 
-std::size_t BattleShip::getHash(const std::vector<BattleShip> &vals)
+std::size_t BattleShip::getHash(std::vector<BattleShip>&& vals)
 {
-    std::vector<BattleShip> copy = vals;
-    std::sort(copy.begin(), copy.end(), [](auto a, auto b)
+    std::sort(vals.begin(), vals.end(), [](auto a, auto b)
               { return a.getPoint() < b.getPoint(); });
               
-    return boost::hash_range(copy.begin(), copy.end());
+    return boost::hash_range(vals.begin(), vals.end());
 }

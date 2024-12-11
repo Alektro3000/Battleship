@@ -15,10 +15,6 @@ namespace widget
         // Could be changed from another thread
         std::atomic<bool> isPlayerTurn;
         // Could be changed from another thread
-        std::vector<std::atomic<Results>> playerShots;
-        // Could be changed from another thread
-        std::vector<std::atomic<Results>> opponentShots;
-        // Could be changed from another thread
         std::atomic<bool> isValid = true;
         bool isOpponentDetached = false;
         std::atomic<bool> isWon = false;
@@ -40,12 +36,11 @@ namespace widget
         {
             return getWidget<1>();
         }
-        std::vector<int> shipHits;
-
-        PointF gridSize;
+        std::vector<unsigned int> shipHits;
         SolidBrush grayBrush{D2D1::ColorF(D2D1::ColorF::LightGray)};
         SolidBrush redBrush{D2D1::ColorF(D2D1::ColorF::Red)};
 
+        PointF gridSize;
         void makeMove(PointI point);
 
     public:
@@ -59,7 +54,6 @@ namespace widget
         void onClick(MouseButton button) override;
         void onResize(RectF newSize) override;
         void onRender() override;
-        void RenderVal(PointI pos, VisualBattleGrid &grid, Results res);
     };
 }
 #endif

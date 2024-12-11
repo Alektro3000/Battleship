@@ -1,6 +1,7 @@
+#include "ServerConnections.h"
 #include "../Widget.h"
 #include "../Base/Builder.h"
-#include "ServerConnections.h"
+#include "../../Players/NetPlayer.h"
 #ifndef WidgetSelectMakeServerH
 #define WidgetSelectMakeServerH
 
@@ -17,7 +18,9 @@ namespace widget
     decltype(editableText()) text = editableText();
     constexpr static RectF TextBegin = {{0.05, 0.4}, {0.4, 0.48}};
     constexpr static RectF ButtonPos = {{0.8, 0.88}, {0.98, 0.99}};
-    std::jthread server;
+    std::future<boost::asio::ip::address_v4> server;
+    GameRules rules;
+    std::atomic<bool> isFutureReady = false;
     std::atomic<boost::asio::io_context*> contextPointer = nullptr; //Needed for faster shutting down
     bool isServerEnabled = false;
 

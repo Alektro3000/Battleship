@@ -28,6 +28,24 @@ namespace widget
                                          { return !ship.hasIntersectionCorner(shipCopy); });
         return isValid;
     }
+    void VisualBattleGrid::RenderVal(PointI pos, Results res)
+    {
+        auto ellipse = D2D1::Ellipse(makeD2DPointF(getCoordPosition(pos) + getGridSize() / 2), 10, 10);
+        if (res == Results::Miss)
+            Context::getInstance().getRenderTarget()->FillEllipse(ellipse, grayBrush);
+        else if (res != Results::Clear)
+        {
+            if (res == Results::Destroy)
+                redBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::DarkRed));
+            Context::getInstance().getRenderTarget()->FillEllipse(ellipse, redBrush);
+
+            redBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+        }
+    }
+    std::atomic<Results> &VisualBattleGrid::getResult(PointI pos)
+    {
+        return shots[pos.x+getSize().x*pos.y];
+    }
     void VisualBattleGrid::onRender()
     {
         Context::getInstance().getRenderTarget()->DrawRectangle(
@@ -59,5 +77,8 @@ namespace widget
 
         std::for_each(ships.begin(), ships.end(), [this](BattleShip ship)
                       { DrawShip(ship, GetShipSnapped(ship)); });
+        for (int i = 0; i < getSize().x; i++)
+            for (int j = 0; j < getSize().y; j++)
+                RenderVal(PointI(i, j), getResult(PointI(i, j)));
     }
 }

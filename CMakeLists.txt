@@ -16,7 +16,7 @@ list(TRANSFORM BattleCpps PREPEND "Battle/")
 
 set(VisualCpps Base.cpp Menu.cpp Net/MakeServer.cpp Net/ListServer.cpp Net/ServerNode.cpp Net/ServerConnections.cpp Base/TextBox.cpp ${BattleCpps}) 
 list(TRANSFORM VisualCpps PREPEND "Widget/")
-set(BaseCpps Players/Player.cpp Players/PcPlayer.cpp Players/BattleShip.cpp DXApp.cpp ${VisualCpps}) 
+set(BaseCpps Players/Player.cpp Players/PcPlayer.cpp Players/NetPlayer.cpp Players/BattleShip.cpp DXApp.cpp ${VisualCpps}) 
 
 add_executable(main WIN32 Main.cpp ${BaseCpps})
 

@@ -1,6 +1,6 @@
 #include "ServerNode.h"
 #include "../Battle/SelectWidget.h"
-#include "../../Players/PcPlayer.h"
+#include "../../Players/NetPlayer.h"
 
 namespace widget
 {
@@ -30,9 +30,8 @@ namespace widget
         boost::system::error_code err;
         boost::asio::read(sock,boost::asio::buffer(&rules, sizeof(rules)), err);
         
-
         ChangeWidget(std::make_unique<SelectWidget>(rules,
-                     std::make_unique<PCPlayer>(rules),
+                     std::make_unique<NetPlayer>(rules, info.ipv4, true),
                      false));
     };
 }

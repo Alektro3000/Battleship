@@ -35,6 +35,7 @@ struct GameRules
 private:
     constexpr static std::array<char, 5> ShipsAmounts = {4,3,2,1,0};
 };
+
 struct BattleShip
 {
 private:
@@ -68,16 +69,31 @@ public:
     {
         return hitMask == ((1<<getLength()) - 1);
     }
-    Results isDestroyedRes(unsigned int hitMask) const noexcept
-    {
-        return isDestroyed(hitMask) ? Results::Destroy : Results::Hit;
-    }
     unsigned int getHitMask(PointI PointI) const noexcept
     {
         static_assert(CHAR_BIT * sizeof(unsigned int) >= 32); //As length of ship can be up to 31
         return 1<<IntersectionPosition(PointI);
     }
-    static std::size_t getHash(const std::vector<BattleShip>& vals);
+    static std::size_t getHash(std::vector<BattleShip>&& vals);
+};
+
+struct AttResult
+{
+    Results val;
+    BattleShip destroyedShip;
+    AttResult(Results val) : val(val){};
+    AttResult(BattleShip ship) : destroyedShip(ship){};
+    AttResult(BattleShip ship, unsigned int hitMask){
+        if(ship.isDestroyed(hitMask))
+        {
+            destroyedShip = ship;
+            val = Results::Destroy;
+        }
+        else
+        {
+            val = Results::Hit;
+        }
+    };
 };
 
 #endif

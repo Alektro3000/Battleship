@@ -10,14 +10,20 @@ namespace widget
                                VisualBattleGrid &&OpponentGrid,
                                bool isPlayerTurn) : Overlay(std::move(PlayerGrid), std::move(OpponentGrid)), isPlayerTurn(isPlayerTurn),
                                                     opponent(std::move(nOpponent)), rules(std::move(nRules)),
-                                                    opponentShots(nRules.getSize().x * nRules.getSize().y),
-                                                    playerShots(nRules.getSize().x * nRules.getSize().y),
                                                     shipHits(nRules.getTotalShipAmount())
     {
+        auto hash = BattleShip::getHash(std::vector(getPlayerGrid().begin(),getPlayerGrid().end()));
         if (!isPlayerTurn)
         {
+            opponent->getHashGrid();
+            opponent->returnHashGrid(hash);
             makingMove = std::jthread([this]()
                                       { try {getMove();} catch(...) {isValid = false;} });
+        }
+        else
+        {
+            opponent->returnHashGrid(hash);
+            opponent->getHashGrid();
         }
     };
 
@@ -42,12 +48,12 @@ namespace widget
     void BattleWidget::makeMove(PointI p)
     {
         auto res = opponent->makeMove(p);
-        opponentShots[p.x * rules.getSize().y + p.y] = res;
-        if (res != Results::Miss)
+        getOpponentGrid().getResult(p) = res.val;
+        if (res.val != Results::Miss)
         {
             totalHits++;
-            if (res == Results::Destroy)
-                getOpponentGrid().addShip(opponent->showDestroyedShip());
+            if (res.val == Results::Destroy)
+                getOpponentGrid().addShip(res.destroyedShip);
             if (totalHits == rules.getTotalHitAmount())
             {
                 isWon = true;
@@ -65,17 +71,17 @@ namespace widget
                                         [shot](BattleShip y)
                                         { return y.IntersectionPosition(shot) != -1; });
 
-        auto result = Results::Miss;
+        AttResult result = Results::Miss;
         if (damagedShip != getPlayerGrid().end())
         {
             auto i = damagedShip - getPlayerGrid().begin();
             shipHits[i] |= damagedShip->getHitMask(shot);
-            result = damagedShip->isDestroyedRes(shipHits[i]);
+            result = AttResult(*damagedShip,shipHits[i]);
         }
 
-        playerShots[shot.x * rules.getSize().y + shot.y] = result;
+        getPlayerGrid().getResult(shot) = result.val;
         opponent->returnResult(result);
-        if (playerShots[shot.x * rules.getSize().y + shot.y] != Results::Miss)
+        if ( result.val != Results::Miss)
         {
             totalOpHits++;
             if (totalOpHits == rules.getTotalHitAmount())
@@ -93,20 +99,6 @@ namespace widget
             isPlayerTurn = true;
     }
 
-    void BattleWidget::RenderVal(PointI pos, VisualBattleGrid &grid, Results res)
-    {
-        auto ellipse = D2D1::Ellipse(makeD2DPointF(grid.getCoordPosition(pos) + grid.getGridSize() / 2), 10, 10);
-        if (res == Results::Miss)
-            Context::getInstance().getRenderTarget()->FillEllipse(ellipse, grayBrush);
-        else if (res != Results::Clear)
-        {
-            if (res == Results::Destroy)
-                redBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::DarkRed));
-            Context::getInstance().getRenderTarget()->FillEllipse(ellipse, redBrush);
-
-            redBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
-        }
-    }
 
     void BattleWidget::onRender()
     {
@@ -121,13 +113,7 @@ namespace widget
                                                                D2D1::Point2F(position.high.x, position.low.y + i * gridSize.y), grayBrush);
 
         Overlay::onRender();
-        for (int i = 0; i < rules.getSize().x; i++)
-            for (int j = 0; j < rules.getSize().y; j++)
-            {
-                RenderVal({i, j}, getPlayerGrid(), playerShots[i * rules.getSize().y + j]);
-                RenderVal({i, j}, getOpponentGrid(), opponentShots[i * rules.getSize().y + j]);
-            }
-        Context::getInstance().getRenderTarget()->DrawRectangle(makeD2DRectF((isPlayerTurn ? getOpponentGrid() : getPlayerGrid()).getGridPos()), redBrush, 3);
+        Context::getInstance().getRenderTarget()->DrawRectangle(makeD2DRectF((isPlayerTurn ? getOpponentGrid() : getPlayerGrid()).getGridPos()), redBrush, 2);
 
         if (!textBox)
         {
