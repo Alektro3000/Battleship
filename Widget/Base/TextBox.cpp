@@ -17,7 +17,7 @@ namespace widget
             //Limit from height
             auto maxHeight = format.textFormat->GetFontSize() *
                         (newSize.size().y * 0.99f) / metric.height / static_cast<float>(metric.lineCount);
-            format = TextFormat(min(maxWidth,maxHeight));
+            format = TextFormat(std::min(maxWidth,maxHeight));
         }
     }
     void TextBox::onRender()

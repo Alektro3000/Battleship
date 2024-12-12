@@ -1,10 +1,11 @@
-#include "Overlay.h"
+#include "Stack.h"
 
 #ifndef PadderWidgetH
 #define PadderWidgetH
 
 namespace widget {
 
+    //widget that add padding, background color and borders
     template<TWidget Child>
     class Padder final : public Stack<Child>
     {
@@ -40,10 +41,6 @@ namespace widget {
             if(borderColor && borderColor.brush->GetOpacity() > 0.f)
                 Context::getInstance().getRenderTarget()->DrawRoundedRectangle(
                     D2D1::RoundedRect(makeD2DRectF(Widget::position),borderRadius,borderRadius),borderColor);
-        }
-        Child& getChild()
-        {
-            return std::get<0>(this->_widgets);
         }
     };
 }

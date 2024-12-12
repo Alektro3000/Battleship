@@ -54,7 +54,7 @@ namespace widget
         else if (getPlayerStartGrid().getGridPos().isPointInside(cursor))
         {
             if (operation.OnClickDown(cursor, getPlayerStartGrid()))
-                ChangeWidget(std::make_unique<BattleWidget>(rules,
+                pushWidget(std::make_unique<BattleWidget>(rules,
                                                             std::move(opponent),
                                                             std::move(getPlayerGrid()),
                                                             std::move(getOpponentGrid()),

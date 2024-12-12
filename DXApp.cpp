@@ -3,10 +3,10 @@
 
 DXApp *AppPtr;
 namespace widget{
-void ChangeWidget(std::unique_ptr<widget::IWidget> NewWidget, bool pushToStackPrev)
-{
-    AppPtr->changeWidget(std::move(NewWidget), pushToStackPrev);
-}
+    void pushWidget(std::unique_ptr<widget::IWidget> NewWidget, bool pushToStackPrev)
+    {
+        AppPtr->pushWidget(std::move(NewWidget), pushToStackPrev);
+    }
 }
 
 DXApp::DXApp(HWND hWnd)
@@ -18,18 +18,25 @@ DXApp::DXApp(HWND hWnd)
 void DXApp::onWinResize(UINT32 width, UINT32 height)
 {
 
+    if(width == 0 && height == 0)
+    {
+        size = PointF(0);
+        return;
+    }
     Context::getInstance().getRenderTarget()->Resize(D2D1::SizeU(width, height));
     size = makePointF(Context::getInstance().getRenderTarget()->GetSize());
     currentWidget->onResize({{0}, size});
 };
 void DXApp::popWidget()
 {
-    changeWidget(std::move(Stack.top()),false);
+    pushWidget(std::move(Stack.top()),false);
     Stack.pop();
 }
 
 void DXApp::renderFrame()
 {
+    if(size == PointF{0})
+        return;
     Context::getInstance().getRenderTarget()->BeginDraw();
 
     currentWidget->onRender();

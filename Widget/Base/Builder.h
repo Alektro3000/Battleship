@@ -63,6 +63,7 @@ namespace widget
                 return std::make_unique<T>(std::move(_state));
             }
         };
+        
         static auto makeText(std::wstring_view str, int size = -1, D2D1::ColorF color = D2D1::ColorF(0, 1))
         {
             return BuildingWidget{TextBox{std::wstring(str), size, color}};
@@ -77,13 +78,6 @@ namespace widget
         {
             return BuildingWidget{Overlay<Args...>(std::move(args)...)};
         };
-        static auto makePopUpNotification(std::wstring_view message, RectF size)
-        {
-            return makeText(message)
-                .addPadding(RectF{{30, 0}}, D2D1::ColorF(D2D1::ColorF::LightSlateGray))
-                .setBorder()
-                .buildPtr(size);
-        }
     };
 }
 #endif

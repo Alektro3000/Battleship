@@ -1,4 +1,4 @@
-#include "Overlay.h"
+#include "Stack.h"
 
 #ifndef ButtonH
 #define ButtonH
@@ -18,10 +18,6 @@ namespace widget
         void onClick(MouseButton button) override
         {
             callback(button);
-        }
-        Child& getChild()
-        {
-            return std::get<0>(this->_widgets);
         }
     };
 }

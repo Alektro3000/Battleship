@@ -3,6 +3,10 @@
 #ifndef RectH
 #define RectH
 
+template<typename T> 
+concept MinMax = requires(T a, T b) { std::min(a, b); } && 
+                requires(T a, T b) { std::max(a, b); };
+
 template <std::copyable T>
 struct Rect
 {
@@ -45,14 +49,6 @@ struct Rect
 
     template <typename K>
         requires requires(T a, K b) { a - b; }
-    constexpr auto operator-(const Rect<K> &right) const noexcept(noexcept(low - right.low))
-    -> Rect<std::decay_t<decltype(low.x - right.low.x)>>
-    {
-        return {low - right.low, high - right.high};
-    };
-
-    template <typename K>
-        requires requires(T a, K b) { a - b; }
     constexpr auto operator-(const K &right) const noexcept(noexcept(low - right))
     -> Rect<std::decay_t<decltype(low.x - right)>>
     {
@@ -68,12 +64,13 @@ struct Rect
     };
 
     template <typename K>
-        requires requires(T a, K b) { a + b; }
-    auto operator+(const Rect<K> &right) const noexcept(noexcept(low + right.low))
-    -> Rect<std::decay_t<decltype(low.x + right.low.x)>>
+        requires requires(T a, K b) { a - b; }
+    constexpr auto operator-(const Rect<K> &right) const noexcept(noexcept(low - right.low))
+    -> Rect<std::decay_t<decltype(low.x - right.low.x)>>
     {
-        return {low + right.low, high + right.high};
+        return {low - right.low, high - right.high};
     };
+    
 
     template <typename K>
         requires requires(T a, K b) { a + b; }
@@ -82,6 +79,7 @@ struct Rect
     {
         return {low + right, high + right};
     };
+    
 
     template <typename K>
         requires requires(T a, K b) { a + b; }
@@ -89,6 +87,14 @@ struct Rect
     -> Rect<std::decay_t<decltype(low.x + right.x)>>
     {
         return {low + right, high + right};
+    };
+
+    template <typename K>
+        requires requires(T a, K b) { a + b; }
+    auto operator+(const Rect<K> &right) const noexcept(noexcept(low + right.low))
+    -> Rect<std::decay_t<decltype(low.x + right.low.x)>>
+    {
+        return {low + right.low, high + right.high};
     };
     
     template <typename K>
@@ -107,19 +113,18 @@ struct Rect
         return {low * right, high * right};
     };
 
-    constexpr Rect<T> operator&(const Rect<T> &right) const noexcept
+    constexpr Rect<T> operator&(const Rect<T> &right) 
+    const noexcept requires MinMax<T>
     {
-        using std::max;
-        using std::min;
-        return {{max(low.x, right.low.x), max(low.y, right.low.y)},
-                {min(high.x, right.high.x), min(high.y, right.high.y)}};
+        return {{std::max(low.x, right.low.x), std::max(low.y, right.low.y)},
+                {std::min(high.x, right.high.x), std::min(high.y, right.high.y)}};
     };
-    constexpr Rect<T> operator|(const Rect<T> &right) const noexcept
+    
+    constexpr Rect<T> operator|(const Rect<T> &right) 
+    const noexcept requires MinMax<T>
     {
-        using std::max;
-        using std::min;
-        return {{min(low.x, right.low.x), min(low.y, right.low.y)},
-                {max(high.x, right.high.x), max(high.y, right.high.y)}};
+        return {{std::min(low.x, right.low.x), std::min(low.y, right.low.y)},
+                {std::max(high.x, right.high.x), std::max(high.y, right.high.y)}};
     };
     constexpr Rect<T> scaled(const Rect<T> &right) const noexcept
     {

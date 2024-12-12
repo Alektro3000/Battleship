@@ -12,7 +12,7 @@ namespace widget
                                                     opponent(std::move(nOpponent)), rules(std::move(nRules)),
                                                     shipHits(nRules.getTotalShipAmount())
     {
-        auto hash = BattleShip::getHash(std::vector(getPlayerGrid().begin(),getPlayerGrid().end()));
+        auto hash = BattleShip::getHash(std::vector(getPlayerGrid().begin(), getPlayerGrid().end()));
         if (!isPlayerTurn)
         {
             opponent->getHashGrid();
@@ -42,28 +42,33 @@ namespace widget
             catch(...)
             {
                 isValid = false;
-            } });
+            }});
         }
     };
+    // Player Move
     void BattleWidget::makeMove(PointI p)
     {
         auto res = opponent->makeMove(p);
         getOpponentGrid().getResult(p) = res.val;
-        if (res.val != Results::Miss)
+        if (res.val == Results::Miss)
         {
-            totalHits++;
-            if (res.val == Results::Destroy)
-                getOpponentGrid().addShip(res.destroyedShip);
-            if (totalHits == rules.getTotalHitAmount())
-            {
-                isWon = true;
-            }
-            else
-                isPlayerTurn = true;
-        }
-        else
             getMove();
+            return;
+        }
+
+        if (res.val == Results::Destroy)
+            getOpponentGrid().addShip(res.destroyedShip);
+
+        if (++totalHits != rules.getTotalHitAmount())
+        {
+            isPlayerTurn = true;
+            return;
+        }
+
+        isWon = true;
+        opponent->onEnd();
     }
+    // Opponent move
     void BattleWidget::getMove()
     {
         PointI shot = opponent->getMove();
@@ -76,29 +81,29 @@ namespace widget
         {
             auto i = damagedShip - getPlayerGrid().begin();
             shipHits[i] |= damagedShip->getHitMask(shot);
-            result = AttResult(*damagedShip,shipHits[i]);
+            result = AttResult(*damagedShip, shipHits[i]);
         }
 
         getPlayerGrid().getResult(shot) = result.val;
         opponent->returnResult(result);
-        if ( result.val != Results::Miss)
+        if (result.val == Results::Miss)
         {
-            totalOpHits++;
-            if (totalOpHits == rules.getTotalHitAmount())
-            {
-                isLost = true;
-                auto ships = opponent->showAllShips();
-                std::for_each(ships.begin(), ships.end(),
-                              [this](auto val)
-                              { getOpponentGrid().addShip(val); });
-            }
-            else
-                getMove();
-        }
-        else
             isPlayerTurn = true;
-    }
+            return;
+        }
 
+        if (++totalOpHits != rules.getTotalHitAmount())
+        {
+            getMove();
+            return;
+        }
+
+        isLost = true;
+        auto ships = opponent->showAllShips();
+        std::for_each(ships.begin(), ships.end(),
+                      [this](auto val)
+                      { getOpponentGrid().addShip(val); });
+    }
 
     void BattleWidget::onRender()
     {

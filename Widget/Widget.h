@@ -11,8 +11,8 @@
 
 namespace widget
 {
-class IWidget
-{
+    class IWidget
+    {
     public:
         virtual void onResize(RectF newSize) {};
         virtual void onRender() {};
@@ -22,7 +22,7 @@ class IWidget
         virtual ~IWidget() {};
     };
 
-    void ChangeWidget(std::unique_ptr<IWidget> NewWidget, bool pushToStackPrev = true);
+    void pushWidget(std::unique_ptr<IWidget> NewWidget, bool pushToStackPrev = true);
 
     template <typename T>
     concept TWidget = std::derived_from<T, IWidget>;

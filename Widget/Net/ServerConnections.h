@@ -1,5 +1,6 @@
 //#define BOOST_ASIO_ENABLE_HANDLER_TRACKING
 #define UNICODE
+#define _WIN32_WINNT 0x0602
 #include <boost/asio.hpp>
 #include <iostream>
 #include <winsock2.h>

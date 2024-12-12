@@ -4,7 +4,8 @@
 using boost::asio::write;
 using boost::asio::buffer;
 
-NetPlayer::NetPlayer(GameRules rules, boost::asio::ip::tcp::socket&& socket, contextPtr&& context, bool server):
+NetPlayer::NetPlayer(GameRules rules, boost::asio::ip::tcp::socket&& socket, 
+    contextPtr&& context, bool server):
  socket(std::move(socket)), context(std::move(context)) {
 
 };

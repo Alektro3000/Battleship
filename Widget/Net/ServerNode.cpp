@@ -27,7 +27,24 @@ namespace widget
         auto context = std::make_unique<boost::asio::io_context>();
         boost::asio::ip::tcp::socket socket(*context, tcp::v4());
         socket.bind(tcp::endpoint(info.ipLocal, clientPort));
-        socket.connect(tcp::endpoint(info.ipv4, serverPort));
+        
+        //Connection with timeout
+        boost::asio::deadline_timer timer(*context, boost::posix_time::seconds(1));
+        bool connected = false;
+        socket.async_connect(tcp::endpoint(info.ipv4, serverPort),[&](auto err){
+            connected = true;
+            timer.cancel();
+        });
+        timer.async_wait([&](auto _){
+            socket.cancel();
+        });
+        context->run();
+
+        if(!connected)
+        {
+            onErrorConnection();
+            return;
+        }
         boost::system::error_code err;
         boost::asio::write(socket, boost::asio::buffer(connectMessage),err);
         
@@ -48,7 +65,7 @@ namespace widget
             return;
         }
         
-        ChangeWidget(std::make_unique<SelectWidget>(rules,
+        pushWidget(std::make_unique<SelectWidget>(rules,
                      std::make_unique<NetPlayer>(rules, std::move(socket), std::move(context), false),!rules.isFirstAttacking()),
                      false);
     };

@@ -19,15 +19,16 @@ public:
     PointF size;
 
     DXApp(HWND hWnd);
-    void changeWidget(std::unique_ptr<widget::IWidget> newWidget, bool pushToStackPrev = true)
+    void pushWidget(std::unique_ptr<widget::IWidget> newWidget, bool pushToStackPrev = true)
     {
         if(pushToStackPrev)
             Stack.push(std::move(currentWidget));
         currentWidget = std::move(newWidget);
-        //currentWidget->changeWidgetSetup([this](auto widget){ changeWidget(std::move(widget)); });
+        
         currentWidget->onResize({{0,0},size});
     }
     void popWidget();
+    //On mouse click dowm
     void onWinClick(POINT point, MouseButton button)
     {
         if(!Stack.empty() && RectF{{0},{60}}.isPointInside(Context::getInstance().getCursor()))
@@ -35,9 +36,11 @@ public:
         else
             currentWidget->onClick(button);
     }
+    //On mouse click up
     void onWinClickUp(MouseButton button) {
         currentWidget->onClickUp(button);
     };
+    //On input from keyboard 
     void onWinChar(WCHAR param) {
         currentWidget->onChar(param);
     };

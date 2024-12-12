@@ -177,7 +177,7 @@ namespace widget
                                         .setBorder()
                                         .addButton(
                                             [this](auto _)
-                                            { ChangeWidget(std::make_unique<MakeServer>()); })
+                                            { pushWidget(std::make_unique<MakeServer>()); })
                                         .build()},
                                    {RectF{{0.5, 0.92}, {0.68, 0.98}},
                                     Builder::makeText(L"Обновить")

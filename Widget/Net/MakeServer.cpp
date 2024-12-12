@@ -110,6 +110,7 @@ namespace widget
                 isFutureReady = true;
                 return std::pair(std::move(holder).getSocket(), std::move(context));  });
     }
+    
     void MakeServer::onResize(RectF newSize)
     {
         Overlay::onResize(newSize);
@@ -132,7 +133,7 @@ namespace widget
         if (isFutureReady)
         {
             auto ip = server.get();
-            ChangeWidget(std::make_unique<SelectWidget>(rules,
+            pushWidget(std::make_unique<SelectWidget>(rules,
                                                         std::make_unique<NetPlayer>(rules, std::move(ip.first), std::move(ip.second),true), rules.isFirstAttacking()),
                          false);
         }

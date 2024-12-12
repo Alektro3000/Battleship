@@ -8,6 +8,7 @@ ID2D1Bitmap *Context::getBitmapFromFile(const wchar_t *uri)
     loaded.try_emplace(uri, bitmap);
     return bitmap;
 }
+
 ID2D1Bitmap *Context::loadBitmapFromFile(const wchar_t *uri)
 {
     IWICBitmapDecoder *pDecoder = nullptr;

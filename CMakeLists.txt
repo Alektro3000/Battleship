@@ -27,6 +27,7 @@ include_directories(asio ${Boost_INCLUDE_DIRS})
 
 add_executable(tests Testing/Point.cpp ${BaseCpps})
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(tests PRIVATE iphlpapi ws2_32 d2d1.lib dwrite.lib)
 
 include(CTest)
 include(Catch)

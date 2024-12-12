@@ -1,5 +1,7 @@
 #define UNICODE
+#define NOMINMAX 1
 #define WIN32_LEAN_AND_MEAN
+#define _WIN32_WINNT 0x0602
 #include <dwrite.h>
 #include <d2d1.h>
 #include <utility>
@@ -8,6 +10,7 @@
 #include "../Players/Player.h"
 #include "../Math/Rect.h"
 #include <boost/unordered_map.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #ifndef BaseWidgetH
 #define BaseWidgetH
@@ -36,7 +39,7 @@ struct Context
     IWICImagingFactory *WICFactory = nullptr;
     HWND hWnd = nullptr;
 
-    boost::unordered_map<std::wstring, ID2D1Bitmap *> loaded;
+    boost::unordered_flat_map<std::wstring, ID2D1Bitmap *> loaded;
     ID2D1Bitmap *loadBitmapFromFile(const wchar_t *path);
 
     ID2D1HwndRenderTarget *getRenderTarget()

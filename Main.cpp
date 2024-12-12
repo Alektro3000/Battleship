@@ -80,7 +80,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // enter the main loop:
     DXApp App(hWnd);
-    App.changeWidget(std::make_unique<widget::Menu>(), false);
+    App.pushWidget(std::make_unique<widget::Menu>(), false);
     AppPtr = &App;
     // this struct holds Windows event messages
     MSG msg = {0};

@@ -14,7 +14,7 @@ BattleShip::BattleShip(PointI begin, int length, Rotation rotation, int variatio
 
 int BattleShip::IntersectionPosition(PointI point) const noexcept
 {
-    auto P = (point - getPoint()).rotated(-getRotation());
+    auto P = (point - getPoint()).rotated(getRotation());
     auto shipLength = getLength();
     return (P.x >= 0 && P.x < shipLength && P.y == 0) ? P.x : -1;
 }
