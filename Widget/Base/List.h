@@ -34,10 +34,10 @@ namespace widget
             std::for_each(childs.begin(), childs.end(),[](auto& val){val.onRender();});
             Context::getInstance().getRenderTarget()->PopAxisAlignedClip();
         }
-        void onClick(MouseButton button) override
+        void onClickDown(MouseButton button) override
         {
             //TODO
-            std::for_each(childs.begin(),childs.end(),[button](auto& val){val.tryClick(button);});
+            std::for_each(childs.begin(),childs.end(),[button](auto& val){val.tryClickDown(button);});
         }
         void update()
         {

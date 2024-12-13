@@ -1,4 +1,5 @@
-#include "Grids/BattleGrid.h"
+#include "Grids/PlayerGrid.h"
+#include "Grids/OpponentGrid.h"
 #include "../Base/TextBox.h"
 #include "../Base/Overlay.h"
 #include <thread>
@@ -10,11 +11,9 @@
 
 namespace widget
 {
-    class BattleWidget final : public Overlay<VisualBattleGrid, VisualBattleGrid>
+    class BattleWidget final : public Overlay<PlayerGrid, OpponentGrid>
     {
-        // Could be changed from another thread
         std::atomic<bool> isPlayerTurn;
-        // Could be changed from another thread
         std::atomic<bool> isValid = true;
         bool isOpponentDetached = false;
         std::atomic<bool> isWon = false;
@@ -28,11 +27,11 @@ namespace widget
 
         std::unique_ptr<Widget> textBox = nullptr;
 
-        VisualBattleGrid &getPlayerGrid()
+        PlayerGrid &getPlayerGrid()
         {
             return getWidget<0>();
         }
-        VisualBattleGrid &getOpponentGrid()
+        OpponentGrid &getOpponentGrid()
         {
             return getWidget<1>();
         }
@@ -46,12 +45,11 @@ namespace widget
     public:
         BattleWidget(GameRules nRules,
                      std::unique_ptr<Player> nOpponent,
-                     VisualBattleGrid &&gridPlayer,
-                     VisualBattleGrid &&gridOpponent,
+                     PlayerGrid &&gridPlayer,
                      bool isPlayerTurn = true);
 
         void getMove();
-        void onClick(MouseButton button) override;
+        void onClickDown(MouseButton button) override;
         void onResize(RectF newSize) override;
         void onRender() override;
     };

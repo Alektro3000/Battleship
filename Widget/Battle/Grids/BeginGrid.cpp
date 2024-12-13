@@ -6,7 +6,7 @@
 namespace widget
 {
 
-    VisualBeginGrid::VisualBeginGrid(GameRules rules) : VisualGrid({10, 3})
+    BeginGrid::BeginGrid(GameRules rules) : Grid({10, 3})
     {
         int x = 0;
         int y = 0;
@@ -24,7 +24,7 @@ namespace widget
         }
     };
 
-    std::optional<BattleShip> VisualBeginGrid::getIntersectionShipCoord(PointI point) const
+    std::optional<BattleShip> BeginGrid::getIntersectionShipCoord(PointI point) const
     {
         auto ship = std::find_if(ships.begin(), ships.end(), [point, this](auto ship)
                                  { return (ship.first.IntersectionPosition(point) != -1) && ship.second > 0; });
@@ -32,19 +32,19 @@ namespace widget
             return (*ship).first;
         return {};
     }
-    void VisualBeginGrid::removeShip(BattleShip ship)
+    void BeginGrid::removeShip(BattleShip ship)
     {
         std::find_if(ships.begin(), ships.end(), [ship](auto oneOf)
                      { return oneOf.first.getLength() == ship.getLength(); })
             ->second--;
     }
-    void VisualBeginGrid::addShip(BattleShip ship)
+    void BeginGrid::addShip(BattleShip ship)
     {
         std::find_if(ships.begin(), ships.end(), [ship](auto oneOf)
                      { return oneOf.first.getLength() == ship.getLength(); })
             ->second++;
     }
-    void VisualBeginGrid::onRender()
+    void BeginGrid::onRender()
     {
         Context::getInstance().getRenderTarget()->DrawRectangle(
             makeD2DRectF(getGridPos()),
@@ -53,8 +53,8 @@ namespace widget
         int draw = 0;
 
         std::for_each(ships.begin(), ships.end(), [this, &draw](auto ship)
-                      { auto a = GetShipSnapped(ship.first);
-                    if(ship.second > 0) {DrawShip(ship.first, a); draw++;} });
+                      { auto a = getShipSnapped(ship.first);
+                    if(ship.second > 0) {drawShip(ship.first, a); draw++;} });
         if (draw == 0)
         {
             WCHAR let[]{L"Закончить выбор?"};
@@ -66,12 +66,12 @@ namespace widget
                 blackBrush);
         }
     }
-    bool VisualBeginGrid::canShipBeAdded(BattleShip shipCopy) const
+    bool BeginGrid::canShipBeAdded(BattleShip shipCopy) const
     {
         return true;
     }
 
-    bool VisualBeginGrid::isButtonBegin(PointF coords)
+    bool BeginGrid::isButtonBegin(PointF coords)
     {
         auto amount = std::accumulate(ships.begin(), ships.end(), 0, [](auto prev, auto cur)
                                       { return prev + cur.second; });

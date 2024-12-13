@@ -25,7 +25,8 @@ struct Player
     virtual void returnResult(AttResult Point) = 0; 
 
     virtual std::vector<BattleShip> showAllShips() = 0;
-    virtual void onEnd() {};
+    virtual void onEnd(std::vector<BattleShip>) = 0;
+    
     virtual void onDetach() {}; 
 };
 

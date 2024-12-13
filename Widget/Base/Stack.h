@@ -32,11 +32,11 @@ namespace widget
             helper([](auto &scr)
                    { scr.onRender(); });
         };
-        void onClick(MouseButton button) override
+        void onClickDown(MouseButton button) override
         {
-            Widget::onClick(button);
+            Widget::onClickDown(button);
             helper([button](auto &scr)
-                   { scr.onClick(button); });
+                   { scr.onClickDown(button); });
         };
         void onClickUp(MouseButton button) override
         {

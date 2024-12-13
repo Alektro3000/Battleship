@@ -17,8 +17,10 @@ enum class Results
 struct GameRules
 {
     bool first = true;
+    PointI size{10,10};
+    std::array<short, 31> ShipsAmounts{4,3,2,1,0};
     //Max: 512/512
-    constexpr PointI getSize() {return {10,10};};
+    constexpr PointI getSize() {return size;};
     constexpr int getShipAmount(int i) {return ShipsAmounts[i-1];};
     constexpr int getTotalShipAmount() {return std::accumulate(ShipsAmounts.begin(),ShipsAmounts.end(),0);};
     constexpr int getTotalHitAmount() 
@@ -32,8 +34,6 @@ struct GameRules
     constexpr bool isValidIndex(PointI pos) {return RectI{0,getSize()}.isPointInsideExcl(pos);};
     //First - server in muliplayer, human in singleplayer
     constexpr bool isFirstAttacking() {return first;};
-private:
-    constexpr static std::array<char, 5> ShipsAmounts = {4,3,2,1,0};
 };
 
 struct BattleShip
@@ -48,7 +48,8 @@ public:
     constexpr auto operator<=>(const BattleShip &left) const = default;
 
      BattleShip() noexcept : BattleShip({0,0},0) {};
-    BattleShip(PointI begin, int length = 1, Rotation rotation = Rotation::Right, int variation = 0) noexcept;
+    BattleShip(PointI begin, int length = 1, 
+        Rotation rotation = Rotation::Right, int variation = 0) noexcept;
     int getX() const noexcept { return x; };
     int getY() const noexcept { return y;  };
     PointI getPoint() const noexcept { return {getX(), getY()};  };
@@ -65,15 +66,8 @@ public:
     bool hasIntersectionAdj(BattleShip other) const noexcept;
     bool hasIntersectionCorner(BattleShip other) const noexcept;
 
-    bool isDestroyed(unsigned int hitMask) const noexcept
-    {
-        return hitMask == ((1<<getLength()) - 1);
-    }
-    unsigned int getHitMask(PointI PointI) const noexcept
-    {
-        static_assert(CHAR_BIT * sizeof(unsigned int) >= 32); //As length of ship can be up to 31
-        return 1<<IntersectionPosition(PointI);
-    }
+    bool isDestroyed(unsigned int hitMask) const noexcept;
+    unsigned int getHitMask(PointI PointI) const noexcept;
     static std::size_t getHash(std::vector<BattleShip>&& vals);
 };
 

@@ -22,7 +22,7 @@ namespace widget
                                                         .addPadding()
                                                         .setBorder()
                                                         .build()) {};
-    void ServerNode::onClick(MouseButton button) {
+    void ServerNode::onClickDown(MouseButton button) {
         
         auto context = std::make_unique<boost::asio::io_context>();
         boost::asio::ip::tcp::socket socket(*context, tcp::v4());

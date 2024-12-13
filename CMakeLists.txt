@@ -11,7 +11,7 @@ find_package(Catch2 3 REQUIRED)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(BattleCpps BattleWidget.cpp SelectWidget.cpp Grids/BattleGrid.cpp Grids/BeginGrid.cpp Grids/Grid.cpp)
+set(BattleCpps BattleWidget.cpp SelectWidget.cpp Grids/BattleGrid.cpp Grids/OpponentGrid.cpp Grids/PlayerGrid.cpp Grids/BeginGrid.cpp Grids/Grid.cpp)
 list(TRANSFORM BattleCpps PREPEND "Battle/")
 
 set(VisualCpps Base.cpp Menu.cpp Net/MakeServer.cpp Net/ListServer.cpp Net/ServerNode.cpp Net/ServerConnections.cpp Base/TextBox.cpp ${BattleCpps}) 

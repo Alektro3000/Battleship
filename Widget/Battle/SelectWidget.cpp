@@ -7,8 +7,12 @@ namespace widget
 {
     SelectWidget::SelectWidget(GameRules nRules,
                                std::unique_ptr<Player> nOpponent,
-                               bool isPlayerTurn) : Overlay((rules.getSize()),
-                                                            (rules), (rules.getSize()),
+                               bool isPlayerTurn) : Overlay<PlayerGrid,
+                                                    BeginGrid,
+                                                    OpponentGrid,
+                                                    Button<Padder<TextBox>>>(PlayerGrid{nRules.getSize()},
+                                                            BeginGrid{nRules}, 
+                                                            OpponentGrid{nRules.getSize(), nRules.getTotalShipAmount()},
                                                             Builder::makeText(L"Авто")
                                                                 .addPadding()
                                                                 .setBorder()
@@ -40,26 +44,25 @@ namespace widget
             }
         }
     }
-    void SelectWidget::onClick(MouseButton button)
+    void SelectWidget::onClickDown(MouseButton button)
     {
         auto cursor = Context::getInstance().getCursor();
-        getAutoButton().tryClick(button);
+        getAutoButton().tryClickDown(button);
         if (button == MouseButton::right)
         {
             operation.OnRotate(cursor);
             return;
         }
         if (getPlayerGrid().getGridPos().isPointInside(cursor))
-            operation.OnClickDown(cursor, getPlayerGrid());
+            operation.onClickDownDown(cursor, getPlayerGrid());
         else if (getPlayerStartGrid().getGridPos().isPointInside(cursor))
         {
-            if (operation.OnClickDown(cursor, getPlayerStartGrid()))
+            if (operation.onClickDownDown(cursor, getPlayerStartGrid()))
                 pushWidget(std::make_unique<BattleWidget>(rules,
-                                                            std::move(opponent),
-                                                            std::move(getPlayerGrid()),
-                                                            std::move(getOpponentGrid()),
-                                                            isPlayerTurn),
-                             false);
+                                                          std::move(opponent),
+                                                          std::move(getPlayerGrid()),
+                                                          isPlayerTurn),
+                           false);
         }
         return;
     };
@@ -68,12 +71,13 @@ namespace widget
     {
         if (button != MouseButton::left)
             return;
-        if (getPlayerGrid().getGridPos().isPointInside(Context::getInstance().getCursor()))
-            operation.OnClickUp(Context::getInstance().getCursor(), getPlayerGrid());
-        else if (getPlayerStartGrid().getGridPos().isPointInside(Context::getInstance().getCursor()))
-            operation.OnClickUp(Context::getInstance().getCursor(), getPlayerStartGrid());
+        auto cursor = Context::getInstance().getCursor();
+        if (getPlayerGrid().getGridPos().isPointInside(cursor))
+            operation.onClickUp(cursor, getPlayerGrid());
+        else if (getPlayerStartGrid().getGridPos().isPointInside(cursor))
+            operation.onClickUp(cursor, getPlayerStartGrid());
         else
-            operation.OnClickUp(Context::getInstance().getCursor());
+            operation.onClickUp(cursor);
     };
 
     void SelectWidget::onRender()
@@ -117,7 +121,7 @@ namespace widget
     }
 
     // Shows that player ended selecting ships positions
-    bool SelectWidget::DragAndDropShip::OnClickDown(PointF point, VisualGrid &grid)
+    bool SelectWidget::DragAndDropShip::onClickDownDown(PointF point, Grid &grid)
     {
         auto ship = grid.getIntersectionShip(point);
         if (ship.has_value())
@@ -132,14 +136,14 @@ namespace widget
             isMovedAway = false;
             return false;
         }
-        auto val = dynamic_cast<VisualBeginGrid *>(&grid);
+        auto val = dynamic_cast<BeginGrid *>(&grid);
         if (val)
             return val->isButtonBegin(point);
 
         return false;
     }
 
-    void SelectWidget::DragAndDropShip::OnClickUp(PointF point, VisualGrid &grid)
+    void SelectWidget::DragAndDropShip::onClickUp(PointF point, Grid &grid)
     {
         if (!isDown)
             return;
@@ -161,7 +165,7 @@ namespace widget
         isDown = false;
     }
 
-    void SelectWidget::DragAndDropShip::OnClickUp(PointF point)
+    void SelectWidget::DragAndDropShip::onClickUp(PointF point)
     {
         if (!isDown)
             return;
@@ -177,9 +181,9 @@ namespace widget
         if (!RectF{point - 2, point + 2}.isPointInside(beginPoint))
             isMovedAway = true;
 
-        auto rect = grabbedShipGrid->GetShipRect(grabbedShip) + grabbedShipGrid->getGridPos().low;
+        auto rect = grabbedShipGrid->getShipRect(grabbedShip) + grabbedShipGrid->getGridPos().low;
 
-        grabbedShipGrid->DrawShip(grabbedShip, rect + point - beginPoint);
+        grabbedShipGrid->drawShip(grabbedShip, rect + point - beginPoint);
     }
 
     void SelectWidget::DragAndDropShip::OnRotate(PointF point)

@@ -1,14 +1,14 @@
 #include "Grid.h"
 
-#ifndef VisualBeginGridH
-#define VisualBeginGridH
+#ifndef BeginGridH
+#define BeginGridH
 
 namespace widget
 {
 
-    struct VisualBeginGrid final : VisualGrid
+    struct BeginGrid final : Grid
     {
-        VisualBeginGrid(GameRules rules);
+        BeginGrid(GameRules rules);
         std::optional<BattleShip> getIntersectionShipCoord(PointI point) const override;
 
         void removeShip(BattleShip ship) override;

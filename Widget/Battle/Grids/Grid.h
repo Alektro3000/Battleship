@@ -3,12 +3,12 @@
 #include "../../Base.h"
 #include <optional>
 
-#ifndef VisualGridH
-#define VisualGridH
+#ifndef GridH
+#define GridH
 
 namespace widget
 {
-    class VisualGrid : public Widget
+    class Grid : public Widget
     {
     protected:
         PointI size;
@@ -16,30 +16,41 @@ namespace widget
         TextFormat format = {40};
 
     public:
-        VisualGrid(PointI size) : size(size) {};
+        Grid(PointI size) : size(size) {};
+        //Convert grid coordinates to global
         PointI getPointCoords(PointF point) const;
+        //Convert global coordinates to grid
         PointF getCoordPosition(PointI point) const;
+        //Returns size of one cell
         PointF getGridSize() const;
+        //Returns position of Grid
         RectF getGridPos() const;
+        //Returns size in local coordinates of grid
         PointI getSize() const;
 
-        RectF GetShipSnapped(BattleShip ship) const;
-        RectF GetShipRect(BattleShip ship) const;
-        bool IsPointIntersect(PointF point, BattleShip ship) const;
+        //Snap ship to grid and return it's position in global coordinates
+        RectF getShipSnapped(BattleShip ship) const;
+        //Converts ship's position to global coordinates
+        RectF getShipRect(BattleShip ship) const;
+        //Check if ship contains in local coordinates contain point in Global coordinates
+        bool isPointIntersect(PointF point, BattleShip ship) const;
+        //Check if ship can be placed in grid
         bool isShipInsideGrid(BattleShip ship) const;
 
+        //Return ship if there is any under selected point in gloval coords
+        std::optional<BattleShip> getIntersectionShip(PointF point) const;
+
+        //Return ship if there is any under selected point in local coords
         virtual std::optional<BattleShip> getIntersectionShipCoord(PointI point) const = 0;
-        std::optional<BattleShip> getIntersectionShip(PointF point) const
-        {
-            return getIntersectionShipCoord(getPointCoords(point));
-        }
+        
         virtual void removeShip(BattleShip ship) = 0;
         virtual void addShip(BattleShip ship) = 0;
         virtual bool canShipBeAdded(BattleShip ship) const = 0;
 
         void onResize(RectF newSize) override;
 
-        void DrawShip(BattleShip ship, RectF position) const;
+        //Draws ship in selected global rect
+        void drawShip(BattleShip ship, RectF position) const;
     };
 }
 

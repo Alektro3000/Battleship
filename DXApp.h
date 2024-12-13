@@ -34,7 +34,7 @@ public:
         if(!Stack.empty() && RectF{{0},{60}}.isPointInside(Context::getInstance().getCursor()))
             popWidget();
         else
-            currentWidget->onClick(button);
+            currentWidget->onClickDown(button);
     }
     //On mouse click up
     void onWinClickUp(MouseButton button) {

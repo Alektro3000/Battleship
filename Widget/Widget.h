@@ -16,7 +16,7 @@ namespace widget
     public:
         virtual void onResize(RectF newSize) {};
         virtual void onRender() {};
-        virtual void onClick(MouseButton button) {};
+        virtual void onClickDown(MouseButton button) {};
         virtual void onClickUp(MouseButton button) {};
         virtual void onChar(WCHAR letter) {};
         virtual ~IWidget() {};
@@ -38,11 +38,11 @@ namespace widget
             return position;
         }
         virtual void onResize(RectF newSize) override { position = newSize; };
-        bool tryClick(MouseButton button)
+        bool tryClickDown(MouseButton button)
         {
             if (position.isPointInsideExcl(Context::getInstance().getCursor()))
             {
-                onClick(button);
+                onClickDown(button);
                 return true;
             }
             return false;

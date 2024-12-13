@@ -1,5 +1,6 @@
 #include "Grids/BeginGrid.h"
-#include "Grids/BattleGrid.h"
+#include "Grids/PlayerGrid.h"
+#include "Grids/OpponentGrid.h"
 #include "../Base/Builder.h"
 
 #include "../Widget.h"
@@ -9,23 +10,23 @@
 
 namespace widget
 {
-    class SelectWidget final : public Overlay<VisualBattleGrid,
-                                                    VisualBeginGrid,
-                                                    VisualBattleGrid,
+    class SelectWidget final : public Overlay<PlayerGrid,
+                                                    BeginGrid,
+                                                    OpponentGrid,
                                                     Button<Padder<TextBox>>>
     {
         bool isPlayerTurn;
         GameRules rules;
         std::unique_ptr<Player> opponent;
-        VisualBattleGrid &getPlayerGrid()
+        PlayerGrid &getPlayerGrid()
         {
             return getWidget<0>();
         }
-        VisualBeginGrid &getPlayerStartGrid()
+        BeginGrid &getPlayerStartGrid()
         {
             return getWidget<1>();
         }
-        VisualBattleGrid &getOpponentGrid()
+        OpponentGrid &getOpponentGrid()
         {
             return getWidget<2>();
         }
@@ -40,12 +41,12 @@ namespace widget
             bool isMovedAway = false;
             BattleShip grabbedShip;
             BattleShip beginShip;
-            VisualGrid *grabbedShipGrid;
+            Grid *grabbedShipGrid;
             PointF beginPoint;
             PointF grabOffset;
-            bool OnClickDown(PointF point, VisualGrid &grid);
-            void OnClickUp(PointF point, VisualGrid &grid);
-            void OnClickUp(PointF point);
+            bool onClickDownDown(PointF point, Grid &grid);
+            void onClickUp(PointF point, Grid &grid);
+            void onClickUp(PointF point);
             void OnUpdate(PointF point);
             void OnRotate(PointF point);
         } operation;
@@ -56,7 +57,7 @@ namespace widget
         SelectWidget(GameRules nRules,
                      std::unique_ptr<Player> nOpponent,
                      bool isPlayerTurn = true);
-        void onClick(MouseButton button) override;
+        void onClickDown(MouseButton button) override;
         void onClickUp(MouseButton button) override;
         void onResize(RectF newSize) override;
         void onRender() override;

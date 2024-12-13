@@ -5,30 +5,7 @@
 
 namespace widget
 {
-    std::optional<BattleShip> VisualBattleGrid::getIntersectionShipCoord(PointI point) const
-    {
-        auto ship = std::find_if(ships.begin(), ships.end(), [point, this](BattleShip ship)
-                                 { return ship.IntersectionPosition(point) != -1; });
-        if (ship != ships.end())
-            return *ship;
-        return {};
-    }
-    void VisualBattleGrid::removeShip(BattleShip ship)
-    {
-        ships.erase(std::find(ships.begin(), ships.end(), ship));
-    }
-    void VisualBattleGrid::addShip(BattleShip ship)
-    {
-        ships.push_back(ship);
-    }
-    bool VisualBattleGrid::canShipBeAdded(BattleShip shipCopy) const
-    {
-        auto isValid = isShipInsideGrid(shipCopy);
-        isValid = isValid && std::all_of(ships.begin(), ships.end(), [shipCopy, this](BattleShip ship)
-                                         { return !ship.hasIntersectionCorner(shipCopy); });
-        return isValid;
-    }
-    void VisualBattleGrid::RenderVal(PointI pos, Results res)
+    void BattleGrid::RenderVal(PointI pos, Results res)
     {
         auto ellipse = D2D1::Ellipse(makeD2DPointF(getCoordPosition(pos) + getGridSize() / 2),  getGridSize().x / 4,  getGridSize().y / 4);
         if (res == Results::Miss)
@@ -42,11 +19,11 @@ namespace widget
             redBrush.brush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
         }
     }
-    std::atomic<Results> &VisualBattleGrid::getResult(PointI pos)
+    std::atomic<Results> &BattleGrid::getResult(PointI pos)
     {
         return shots[pos.x+getSize().x*pos.y];
     }
-    void VisualBattleGrid::onRender()
+    void BattleGrid::onRender()
     {
         Context::getInstance().getRenderTarget()->DrawRectangle(
             makeD2DRectF(getGridPos()),
@@ -75,10 +52,12 @@ namespace widget
                 blackBrush);
         }
 
-        std::for_each(ships.begin(), ships.end(), [this](BattleShip ship)
-                      { DrawShip(ship, GetShipSnapped(ship)); });
+    }
+        void BattleGrid::renderShots()
+        {
+            
         for (int i = 0; i < getSize().x; i++)
             for (int j = 0; j < getSize().y; j++)
                 RenderVal(PointI(i, j), getResult(PointI(i, j)));
-    }
+        }
 }

@@ -47,16 +47,26 @@ bool BattleShip::hasIntersectionCorner(BattleShip other) const noexcept
     auto fl = diff.x >= -1 && diff.y >= -1;
     return fl;
 }
-    std::size_t hash_value(BattleShip const& b)
-    {
-        boost::hash<int> hasher;
-        return hasher(std::bit_cast<int>(b));
-    }
+std::size_t hash_value(BattleShip const &b)
+{
+    boost::hash<int> hasher;
+    return hasher(std::bit_cast<int>(b));
+}
 
-std::size_t BattleShip::getHash(std::vector<BattleShip>&& vals)
+std::size_t BattleShip::getHash(std::vector<BattleShip> &&vals)
 {
     std::sort(vals.begin(), vals.end(), [](auto a, auto b)
               { return a.getPoint() < b.getPoint(); });
-              
+
     return boost::hash_range(vals.begin(), vals.end());
+}
+bool BattleShip::isDestroyed(unsigned int hitMask) const noexcept
+{
+    static_assert(CHAR_BIT * sizeof(unsigned int) >= 32); // Because length of ship can be up to 31
+    return hitMask == ((1 << getLength()) - 1);
+}
+unsigned int BattleShip::getHitMask(PointI PointI) const noexcept
+{
+    static_assert(CHAR_BIT * sizeof(unsigned int) >= 32); // Because length of ship can be up to 31
+    return 1 << IntersectionPosition(PointI);
 }

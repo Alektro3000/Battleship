@@ -6,28 +6,30 @@ namespace widget
 {
     BattleWidget::BattleWidget(GameRules nRules,
                                std::unique_ptr<Player> nOpponent,
-                               VisualBattleGrid &&PlayerGrid,
-                               VisualBattleGrid &&OpponentGrid,
-                               bool isPlayerTurn) : Overlay(std::move(PlayerGrid), std::move(OpponentGrid)), isPlayerTurn(isPlayerTurn),
+                               PlayerGrid &&PlayerGrid,
+                               bool isPlayerTurn) : Overlay(std::move(PlayerGrid), OpponentGrid{nRules.getSize(),nRules.getTotalShipAmount()}), isPlayerTurn(isPlayerTurn),
                                                     opponent(std::move(nOpponent)), rules(std::move(nRules)),
                                                     shipHits(nRules.getTotalShipAmount())
     {
-        auto hash = BattleShip::getHash(std::vector(getPlayerGrid().begin(), getPlayerGrid().end()));
+        auto hash = BattleShip::getHash(std::vector<BattleShip>(getPlayerGrid().begin(), getPlayerGrid().end()));
         if (!isPlayerTurn)
         {
-            opponent->getHashGrid();
-            opponent->returnHashGrid(hash);
-            makingMove = std::jthread([this]()
-                                      { try {getMove();} catch(...) {isValid = false;} });
+            makingMove = std::jthread([this, hash]()
+                                      { try {
+                                    opponent->getHashGrid();
+                                    opponent->returnHashGrid(hash);
+                                    getMove();} catch(...) {isValid = false;} });
         }
         else
         {
-            opponent->returnHashGrid(hash);
-            opponent->getHashGrid();
+            makingMove = std::jthread([this, hash]()
+                                      { try {
+                                    opponent->returnHashGrid(hash);
+                                    opponent->getHashGrid();} catch(...) {isValid = false;} });
         }
     };
 
-    void BattleWidget::onClick(MouseButton button)
+    void BattleWidget::onClickDown(MouseButton button)
     {
         if (isValid && isPlayerTurn && getOpponentGrid().getGridPos().isPointInsideExcl(Context::getInstance().getCursor()))
         {
@@ -42,7 +44,7 @@ namespace widget
             catch(...)
             {
                 isValid = false;
-            }});
+            } });
         }
     };
     // Player Move
@@ -66,7 +68,7 @@ namespace widget
         }
 
         isWon = true;
-        opponent->onEnd();
+        opponent->onEnd(std::vector<BattleShip>(getPlayerGrid().begin(), getPlayerGrid().end()));
     }
     // Opponent move
     void BattleWidget::getMove()
@@ -80,7 +82,7 @@ namespace widget
         if (damagedShip != getPlayerGrid().end())
         {
             auto i = damagedShip - getPlayerGrid().begin();
-            shipHits[i] |= damagedShip->getHitMask(shot);
+            shipHits[i] |= (*damagedShip).getHitMask(shot);
             result = AttResult(*damagedShip, shipHits[i]);
         }
 
@@ -118,7 +120,8 @@ namespace widget
                                                                D2D1::Point2F(position.high.x, position.low.y + i * gridSize.y), grayBrush);
 
         Overlay::onRender();
-        Context::getInstance().getRenderTarget()->DrawRectangle(makeD2DRectF((isPlayerTurn ? getOpponentGrid() : getPlayerGrid()).getGridPos()), redBrush, 2);
+        Context::getInstance().getRenderTarget()->DrawRectangle(
+            makeD2DRectF((isPlayerTurn ? getOpponentGrid().getGridPos() : getPlayerGrid().getGridPos())), redBrush, 2);
 
         if (!textBox)
         {

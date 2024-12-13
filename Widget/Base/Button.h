@@ -15,7 +15,7 @@ namespace widget
             Stack<Child>(std::move(child)), callback(std::move(callback)) {};
         Button(Button &&other) = default;
         Button &operator=(Button &&other) = default;
-        void onClick(MouseButton button) override
+        void onClickDown(MouseButton button) override
         {
             callback(button);
         }

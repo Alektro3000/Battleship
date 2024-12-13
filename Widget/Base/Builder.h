@@ -78,6 +78,13 @@ namespace widget
         {
             return BuildingWidget{Overlay<Args...>(std::move(args)...)};
         };
+        static auto makePopUpNotification(std::wstring_view message, RectF size)
+        {
+            return makeText(message)
+                .addPadding(RectF{{30, 0}}, D2D1::ColorF(D2D1::ColorF::LightSlateGray))
+                .setBorder()
+                .buildPtr(size);
+        }
     };
 }
 #endif

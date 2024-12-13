@@ -18,19 +18,19 @@ PointI PCPlayer::getMove()
         target = PointI{dist / 10, dist % 10};
     }
     counter++;
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     return target;
 }
 void PCPlayer::buildShipLocations()
 {
     int x = 0;
     int y = 0;
-    for (int i = _rules.getMaxShipLength(); i >= 1; i--)
-        for (int j = 0; j < _rules.getShipAmount(i); j++)
+    for (int i = rules.getMaxShipLength(); i >= 1; i--)
+        for (int j = 0; j < rules.getShipAmount(i); j++)
         {
             BattleShip a = {PointI(x, y), i};
             x += i + 1;
-            if (x + i > _rules.getSize().x)
+            if (x + i > rules.getSize().x)
             {
                 y += 2;
                 x = 0;
@@ -43,8 +43,8 @@ void PCPlayer::buildShipLocations()
         return;
     ships.pop_back();
 
-    int restX = (_rules.getSize().x - x);
-    int restY = (_rules.getSize().y - y - 2) * _rules.getSize().x;
+    int restX = (rules.getSize().x - x);
+    int restY = (rules.getSize().y - y - 2) * rules.getSize().x;
     int possible = restX * 2 + restY;
 
     int rand = std::abs(int(mt())) % possible;
@@ -55,7 +55,7 @@ void PCPlayer::buildShipLocations()
     else
     {
         rand -= restX * 2;
-        ships.emplace_back(PointI(rand % _rules.getSize().x, y + rand / _rules.getSize().x), 1);
+        ships.emplace_back(PointI(rand % rules.getSize().x, y + rand / rules.getSize().x), 1);
     }
 }
 
@@ -73,8 +73,6 @@ AttResult PCPlayer::makeMove(PointI x)
         return Results::Miss;
     auto i = damagedShip - ships.begin();
     shipHits[i] |= damagedShip->getHitMask(x);
-    if (damagedShip->isDestroyed(shipHits[i]))
-        lastDestroyed = *damagedShip;
     return AttResult(*damagedShip,shipHits[i]);
 }
 
@@ -85,20 +83,22 @@ size_t PCPlayer::getHashGrid()
 
 void PCPlayer::returnResult(AttResult res)
 {
-    playerHits[_rules.flatIndex(target)] = res.val;
+    playerHits[rules.flatIndex(target)] = res.val;
+
     std::array adj{PointI{1, 0}, PointI{0, 1}, PointI{-1, 0}, PointI{0, -1}};
+    std::shuffle(adj.begin(),adj.end(), mt);
+
     std::array corner{PointI{1, 1}, PointI{-1, 1}, PointI{-1, -1}, PointI{1, -1}};
     if (res.val == Results::Hit)
     {
         for (auto q : corner)
-            if (_rules.isValidIndex(target + q))
-                playerHits[_rules.flatIndex(target + q)] = Results::Miss;
+            if (rules.isValidIndex(target + q))
+                playerHits[rules.flatIndex(target + q)] = Results::Miss;
         if (prevHit != PointI{-1})
         {
-            if (_rules.isValidIndex(target + (target - prevHit).sgn()))
+            if (rules.isValidIndex(target + (target - prevHit).sgn()))
             {
                 target = target + (target - prevHit).sgn();
-
                 isWalking = true;
             }
             else
@@ -108,8 +108,8 @@ void PCPlayer::returnResult(AttResult res)
         {
             prevHit = target;
             for (auto q : adj)
-                if (_rules.isValidIndex(target + q) &&
-                    playerHits[_rules.flatIndex(target + q)] == Results::Clear)
+                if (rules.isValidIndex(target + q) &&
+                    playerHits[rules.flatIndex(target + q)] == Results::Clear)
                 {
                     target = target + q;
                     break;
@@ -128,8 +128,8 @@ void PCPlayer::returnResult(AttResult res)
         if (prevHit != PointI{-1})
         {
             for (auto q : adj)
-                if (_rules.isValidIndex(prevHit + q) &&
-                    playerHits[_rules.flatIndex(prevHit + q)] == Results::Clear)
+                if (rules.isValidIndex(prevHit + q) &&
+                    playerHits[rules.flatIndex(prevHit + q)] == Results::Clear)
                     target = prevHit + q;
             return;
         }
@@ -137,19 +137,19 @@ void PCPlayer::returnResult(AttResult res)
     if (res.val == Results::Destroy)
     {
         for (auto q : adj)
-            if (_rules.isValidIndex(prevHit + q) &&
-                playerHits[_rules.flatIndex(prevHit + q)] == Results::Clear)
-                playerHits[_rules.flatIndex(prevHit + q)] = Results::Miss;
+            if (rules.isValidIndex(prevHit + q) &&
+                playerHits[rules.flatIndex(prevHit + q)] == Results::Clear)
+                playerHits[rules.flatIndex(prevHit + q)] = Results::Miss;
         prevHit = {-1};
         isWalking = false;
 
         for (auto q : adj)
-            if (_rules.isValidIndex(target + q) &&
-                playerHits[_rules.flatIndex(target + q)] == Results::Clear)
-                playerHits[_rules.flatIndex(target + q)] = Results::Miss;
+            if (rules.isValidIndex(target + q) &&
+                playerHits[rules.flatIndex(target + q)] == Results::Clear)
+                playerHits[rules.flatIndex(target + q)] = Results::Miss;
         for (auto q : corner)
-            if (_rules.isValidIndex(target + q))
-                playerHits[_rules.flatIndex(target + q)] = Results::Miss;
+            if (rules.isValidIndex(target + q))
+                playerHits[rules.flatIndex(target + q)] = Results::Miss;
     }
     target = {-1};
 };

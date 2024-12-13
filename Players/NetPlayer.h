@@ -10,15 +10,16 @@ struct NetPlayer final : Player
 {
     using contextPtr = std::unique_ptr<boost::asio::io_context>;
 private:
-    GameRules _rules;
+    GameRules rules;
     boost::asio::ip::tcp::socket socket;
     contextPtr context;
 public:
     NetPlayer(GameRules rules, boost::asio::ip::tcp::socket&& socket, contextPtr&& context, bool server);
     AttResult makeMove(PointI x) override;
     std::vector<BattleShip> showAllShips() override;
+    void onEnd(std::vector<BattleShip> ships) override;
     std::size_t getHashGrid() override;
     PointI getMove() override;
     void returnResult(AttResult res) override;
-    void returnHashGrid(std::size_t val) override {};
+    void returnHashGrid(std::size_t val) override;
 };
