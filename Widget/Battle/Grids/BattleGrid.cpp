@@ -32,7 +32,7 @@ namespace widget
         for (int i = 0; i < size.x; i++)
         {
             constexpr std::array nums{L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9", L"10"};
-            auto offset = position.low + PointI{1 + i, 0} * getGridSize();
+            auto offset = getPosition().low + PointI{1 + i, 0} * getGridSize();
             Context::getInstance().getRenderTarget()->DrawText(
                 nums[i],
                 std::wcslen(nums[i]),
@@ -43,7 +43,7 @@ namespace widget
         for (int i = 0; i < size.y; i++)
         {
             constexpr std::array letters{L"А", L"Б", L"В", L"Г", L"Д", L"Е", L"Ж", L"З", L"И", L"К"};
-            auto offset = position.low + PointI{0, 1 + i} * getGridSize();
+            auto offset = getPosition().low + PointI{0, 1 + i} * getGridSize();
             Context::getInstance().getRenderTarget()->DrawText(
                 letters[i],
                 std::wcslen(letters[i]),

@@ -20,5 +20,21 @@ namespace widget
             callback(button);
         }
     };
+
+    template <TWidget Child>
+    class ButtonUp final : public Stack<Child>
+    {
+        std::function<void(MouseButton)> callback;
+
+    public:
+        ButtonUp(Child &&child, auto &&callback) : 
+            Stack<Child>(std::move(child)), callback(std::move(callback)) {};
+        ButtonUp(ButtonUp &&other) = default;
+        ButtonUp &operator=(ButtonUp &&other) = default;
+        void onClickUp(MouseButton button) override
+        {
+            callback(button);
+        }
+    };
 }
 #endif

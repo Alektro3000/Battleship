@@ -11,8 +11,8 @@ namespace widget
         std::vector<Child> childs;
         float padding;
         float height;
-        float heightPer;
-        List(float padding, float height, float heightPer = 0) : padding(padding), height(height), heightPer(heightPer) {};
+        float heightPercentage;
+        List(float padding, float height, float heightPer = 0) : padding(padding), height(height), heightPercentage(heightPer) {};
         List(List &&other) = default;
         List &operator=(List &&other) = default;
         void onResize(RectF newSize) override
@@ -28,7 +28,7 @@ namespace widget
         {
             IWidget::onRender();
             Context::getInstance().getRenderTarget()->PushAxisAlignedClip(
-                makeD2DRectF(this->position),
+                makeD2DRectF(this->getPosition()),
                 D2D1_ANTIALIAS_MODE_PER_PRIMITIVE
             );
             std::for_each(childs.begin(), childs.end(),[](auto& val){val.onRender();});
@@ -39,22 +39,27 @@ namespace widget
             //TODO
             std::for_each(childs.begin(),childs.end(),[button](auto& val){val.tryClickDown(button);});
         }
+        void onClickUp(MouseButton button) override
+        {
+            //TODO
+            std::for_each(childs.begin(),childs.end(),[button](auto& val){val.tryClickUp(button);});
+        }
         void update()
         {
-            onResize(position);
+            onResize(getPosition());
         }
         RectF getNodePosition(int counter)
         {
-            auto nodeHeight = heightPer*position.size().y + height;
-            return RectF{{position.low.x,position.low.y+ (nodeHeight+padding)*counter}, 
-                    {position.high.x,position.low.y+ (nodeHeight+padding)*counter + nodeHeight}};
+            auto nodeHeight = heightPercentage*getPosition().size().y + height;
+            return RectF{{getPosition().low.x,getPosition().low.y+ (nodeHeight+padding)*counter}, 
+                    {getPosition().high.x,getPosition().low.y+ (nodeHeight+padding)*counter + nodeHeight}};
         }
         int getNodeIndex(PointF point)
         {
-            if(!position.isPointInside(point))
+            if(!getPosition().isPointInside(point))
                 return -1;
-            auto y = point.y - position.low.y;
-            auto nodeHeight = heightPer*position.size().y + height;
+            auto y = point.y - getPosition().low.y;
+            auto nodeHeight = heightPercentage*getPosition().size().y + height;
             auto normalized = y%(nodeHeight+padding); 
             return -1;
         }

@@ -6,36 +6,22 @@
 namespace widget
 {
 
-    class TextBox : public Widget
+    class TextBox final: public Widget
     {
-    protected:
         TextFormat format;
         SolidBrush brush;
-        int size;
+        float size;
         std::wstring string;
 
     public:
         bool isEditable = false;
-        TextBox(std::wstring str, int size = -1, D2D1::ColorF color = D2D1::ColorF(0, 1)) : string(std::move(str)), size(size), brush(color), format(size) {};
+        TextBox(std::wstring str, float size = -1, D2D1::ColorF color = D2D1::ColorF(0, 1)) : string(std::move(str)), size(size), brush(color), format(size) {};
         void onResize(RectF newSize) override;
         void onRender() override;
-        void UpdateTextColor(D2D1::ColorF newColor = D2D1::ColorF(0, 1))
-        {
-            brush = SolidBrush(newColor);
-        }
-        void UpdateText(std::wstring newText)
-        {
-            string = newText;
-        }
-        std::wstring getText()
-        {
-            return string;
-        }
-        D2D1::ColorF GetTextColor()
-        {
-            auto val = brush.brush->GetColor();
-            return D2D1::ColorF(val.r, val.g, val.b, val.a);
-        }
+        void updateTextColor(D2D1::ColorF newColor = D2D1::ColorF(0, 1));
+        void updateText(std::wstring newText);
+        std::wstring getText();
+        D2D1::ColorF getTextColor();
         void onChar(WCHAR letter) override;
     };
 }

@@ -64,7 +64,7 @@ namespace widget
             }
         };
         
-        static auto makeText(std::wstring_view str, int size = -1, D2D1::ColorF color = D2D1::ColorF(0, 1))
+        static auto makeText(std::wstring_view str, float size = -1, D2D1::ColorF color = D2D1::ColorF(0, 1))
         {
             return BuildingWidget{TextBox{std::wstring(str), size, color}};
         };

@@ -84,13 +84,13 @@ namespace widget
     {
         Context::getInstance().getRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
-        for (int i = 0; i < position.size().x / gridSize.x; i++)
-            Context::getInstance().getRenderTarget()->DrawLine(D2D1::Point2F(position.low.x + i * gridSize.x, position.low.y),
-                                                               D2D1::Point2F(position.low.x + i * gridSize.x, position.high.y), grayBrush);
+        for (int i = 0; i < getPosition().size().x / gridSize.x; i++)
+            Context::getInstance().getRenderTarget()->DrawLine(D2D1::Point2F(getPosition().low.x + i * gridSize.x, getPosition().low.y),
+                                                               D2D1::Point2F(getPosition().low.x + i * gridSize.x, getPosition().high.y), grayBrush);
 
-        for (int i = 0; i < position.size().y / gridSize.y; i++)
-            Context::getInstance().getRenderTarget()->DrawLine(D2D1::Point2F(position.low.x, position.low.y + i * gridSize.y),
-                                                               D2D1::Point2F(position.high.x, position.low.y + i * gridSize.y), grayBrush);
+        for (int i = 0; i < getPosition().size().y / gridSize.y; i++)
+            Context::getInstance().getRenderTarget()->DrawLine(D2D1::Point2F(getPosition().low.x, getPosition().low.y + i * gridSize.y),
+                                                               D2D1::Point2F(getPosition().high.x, getPosition().low.y + i * gridSize.y), grayBrush);
 
         Overlay::onRender();
 
@@ -105,12 +105,12 @@ namespace widget
     {
         Widget::onResize(newSize);
 
-        gridSize = position.size().x / 30;
+        gridSize = getPosition().size().x / 30;
         auto grid1Offset = gridSize * PointI{2, 1};
         getPlayerGrid().onResize({grid1Offset, grid1Offset + gridSize * (rules.getSize() + 1)});
 
         auto grid2Offset = gridSize * PointI{2, 1};
-        grid2Offset.x = position.size().x - grid2Offset.x - gridSize.x * (1 + rules.getSize().x);
+        grid2Offset.x = getPosition().size().x - grid2Offset.x - gridSize.x * (1 + rules.getSize().x);
         getOpponentGrid().onResize({grid2Offset, grid2Offset + gridSize * (rules.getSize() + 1)});
 
         auto gridBeginOffset = gridSize * Point{2, 12};

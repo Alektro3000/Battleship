@@ -237,7 +237,7 @@ namespace widget
 
         if (isUpdating)
         {
-            Context::getInstance().getRenderTarget()->FillRectangle(makeD2DRectF(RectF{{0.1, 0.1}, {0.9, 0.9}}.scaled(position)), halfOpacity);
+            Context::getInstance().getRenderTarget()->FillRectangle(makeD2DRectF(RectF{{0.1, 0.1}, {0.9, 0.9}}.scaled(getPosition())), halfOpacity);
         }
     }
     ServerList::~ServerList()

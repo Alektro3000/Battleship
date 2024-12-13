@@ -25,7 +25,7 @@ namespace widget
         GameRules rules;
         std::unique_ptr<Player> opponent;
 
-        std::unique_ptr<Widget> textBox = nullptr;
+        std::unique_ptr<IWidget> textBox = nullptr;
 
         PlayerGrid &getPlayerGrid()
         {

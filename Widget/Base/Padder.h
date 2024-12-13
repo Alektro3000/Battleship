@@ -22,7 +22,6 @@ namespace widget {
         void onResize(RectF newSize) override
         {
             Stack<Child>::onResize(newSize+RectF{padding.low,-padding.high});
-            Stack<Child>::position = newSize;
         }
         void setBorder(D2D1::ColorF color, int width = 1, int radius = 10)
         {
@@ -34,13 +33,17 @@ namespace widget {
         {   
             if(backColor)
                 Context::getInstance().getRenderTarget()->FillRoundedRectangle(
-                    D2D1::RoundedRect(makeD2DRectF(Widget::position),borderRadius,borderRadius),backColor);
+                    D2D1::RoundedRect(makeD2DRectF(this->getPosition()),borderRadius,borderRadius),backColor);
 
             Stack<Child>::onRender();
 
             if(borderColor && borderColor.brush->GetOpacity() > 0.f)
                 Context::getInstance().getRenderTarget()->DrawRoundedRectangle(
-                    D2D1::RoundedRect(makeD2DRectF(Widget::position),borderRadius,borderRadius),borderColor);
+                    D2D1::RoundedRect(makeD2DRectF(this->getPosition()),borderRadius,borderRadius),borderColor);
+        }
+        RectF getPosition() const override
+        {
+            return Stack<Child>::getChild().getPosition() - RectF{padding.low,-padding.high};
         }
     };
 }

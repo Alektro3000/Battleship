@@ -24,7 +24,7 @@ namespace widget
     };
     RectF Grid::getGridPos() const
     {
-        return position + RectF{getGridSize(), {0, 0}};
+        return getPosition() + RectF{getGridSize(), {0, 0}};
     };
     PointF Grid::getCoordPosition(PointI point) const
     {
@@ -32,7 +32,7 @@ namespace widget
     };
     PointF Grid::getGridSize() const
     {
-        return position.size() / (size + 1);
+        return getPosition().size() / (size + 1);
     }
     PointI Grid::getSize() const
     {

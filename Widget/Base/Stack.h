@@ -10,7 +10,7 @@ namespace widget
     
     //widget that contains several widgets fullsized, and will forward all events to childs
     template <TWidget... Args>
-    class Stack: public Widget
+    class Stack: public IWidget
     {
     public:
         std::tuple<Args...> widgets;
@@ -22,38 +22,41 @@ namespace widget
         }
         void onResize(RectF newSize) override
         {
-            Widget::onResize(newSize);
             helper([newSize](auto &scr)
                    { scr.onResize(newSize); });
         };
         void onRender() override
         {
-            Widget::onRender();
             helper([](auto &scr)
                    { scr.onRender(); });
         };
         void onClickDown(MouseButton button) override
         {
-            Widget::onClickDown(button);
             helper([button](auto &scr)
                    { scr.onClickDown(button); });
         };
         void onClickUp(MouseButton button) override
         {
-            Widget::onClickUp(button);
             helper([button](auto &scr)
                    { scr.onClickUp(button); });
         };
         void onChar(WCHAR letter) override
         {
-            Widget::onChar(letter);
             helper([letter](auto &scr)
                    { scr.onChar(letter); });
         };
         auto& getChild() requires (sizeof...(Args) == 1)
         {
             return std::get<0>(widgets);
-        }
+        };
+        const auto& getChild() const requires (sizeof...(Args) == 1)
+        {
+            return std::get<0>(widgets);
+        };
+        RectF getPosition() const override
+        {
+            return getChild().getPosition();
+        };
     private:
         template <std::size_t I = 0, typename F>
         void helper(const F &function)

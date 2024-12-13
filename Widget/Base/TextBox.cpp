@@ -11,20 +11,20 @@ namespace widget
         {
             format = TextFormat(0.125f);
             auto metric = format.getTextMetrix(string, newSize.size());
-            //Limit from width
+            // Limit from width
             auto maxWidth = format.textFormat->GetFontSize() *
-                        (newSize.size().x * 0.99f) / metric.width / static_cast<float>(metric.lineCount);
-            //Limit from height
+                            (newSize.size().x * 0.99f) / metric.width / static_cast<float>(metric.lineCount);
+            // Limit from height
             auto maxHeight = format.textFormat->GetFontSize() *
-                        (newSize.size().y * 0.99f) / metric.height / static_cast<float>(metric.lineCount);
-            format = TextFormat(std::min(maxWidth,maxHeight));
+                             (newSize.size().y * 0.99f) / metric.height / static_cast<float>(metric.lineCount);
+            format = TextFormat(std::min(maxWidth, maxHeight));
         }
     }
     void TextBox::onRender()
     {
         Widget::onRender();
         Context::getInstance().getRenderTarget()->DrawText(string.c_str(),
-                                                           string.size(), format, makeD2DRectF(position), brush);
+                                                           string.size(), format, makeD2DRectF(getPosition()), brush);
     }
 
     void TextBox::onChar(WCHAR letter)
@@ -40,7 +40,7 @@ namespace widget
         else
         {
             string.push_back(letter);
-            auto pos = position.size();
+            auto pos = getPosition().size();
             IDWriteTextLayout *layout;
             Context::getInstance().getWriteFactory()->CreateTextLayout(string.c_str(), string.size(), format, pos.x, pos.y, &layout);
             DWRITE_TEXT_METRICS lam;
@@ -49,5 +49,22 @@ namespace widget
             if (lam.height > pos.y)
                 string.pop_back();
         }
+    }
+    void TextBox::updateTextColor(D2D1::ColorF newColor)
+    {
+        brush = SolidBrush(newColor);
+    }
+    D2D1::ColorF TextBox::getTextColor()
+    {
+        auto val = brush.brush->GetColor();
+        return D2D1::ColorF(val.r, val.g, val.b, val.a);
+    }
+    std::wstring TextBox::getText()
+    {
+        return string;
+    }
+    void TextBox::updateText(std::wstring newText)
+    {
+        string = newText;
     }
 }
