@@ -13,8 +13,8 @@ namespace widget {
         RectF padding;
         SolidBrush borderColor;
         SolidBrush backColor;
-        int borderWidth;
-        int borderRadius;
+        int borderWidth = 0;
+        int borderRadius = 0;
     public:
         Padder(Child&& child, RectF padding, D2D1::ColorF backColor = D2D1::ColorF(0,0)):
             Stack<Child>(std::move(child)), padding(std::move(padding)), backColor(backColor) {};
@@ -41,7 +41,7 @@ namespace widget {
 
             if(borderColor && borderColor.brush->GetOpacity() > 0.f)
                 Context::getInstance().getRenderTarget()->DrawRoundedRectangle(
-                    D2D1::RoundedRect(makeD2DRectF(this->getPosition()),borderRadius,borderRadius),borderColor);
+                    D2D1::RoundedRect(makeD2DRectF(this->getPosition()),borderRadius,borderRadius),borderColor, borderWidth);
         }
         RectF getPosition() const override
         {

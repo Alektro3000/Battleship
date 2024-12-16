@@ -151,9 +151,8 @@ namespace widget
     }
 
     // finds servers
-    std::vector<ResponseFull> queryServers()
+    std::vector<ResponseFull> queryServers(std::vector<netIps> devices)
     {
-        auto devices = queryDevices();
         // Asynchronously send messages for all subnets
         std::vector<std::future<std::vector<ResponseFull>>> tasks;
         for (auto ip : devices)
@@ -191,7 +190,13 @@ namespace widget
                                     Builder::makeList<ServerNode>(10, 0, 0.1)
                                         .addPadding(RectF{{10, 10}})
                                         .setBorder()
-                                        .build()})
+                                        .build()},
+                                    {RectF{{0.1},{0.9}}, Switch(TextBox{L"Нет серверов"})},
+                                   {RectF{{0.1}, {0.9}},
+                                    Builder::makeEmpty()
+                                    .addPadding({0,0},D2D1::ColorF(D2D1::ColorF::LightGray, 0.5f))
+                                    .addSwitch().build()},
+                                   {RectF{0,1}, WidgetPtr{}})
     {
         updateServers();
     }
@@ -201,40 +206,40 @@ namespace widget
         {
             isUpdating = true;
             isFutureReady = false;
-            quering = std::async(std::launch::async, [this]()
+            auto devices = queryDevices();
+            if(devices.size() == 0)
+            {
+                getPopup().widget = Builder::makePopUpNotification(L"Не удалось подключится", getPosition());
+                return;
+            }
+            quering = std::async(std::launch::async, [this, devices]()
                                  {
-                                    auto a = queryServers(); 
+                                    auto a = queryServers(devices); 
                                     isFutureReady = true;
                                     return a; });
         }
     }
-    void ServerList::onResize(RectF newSize)
-    {
-        Overlay::onResize(newSize);
-        NoServerBox.onResize(RectF{{0.1, 0.1}, {0.9, 0.9}}.scaled(newSize));
-    }
     void ServerList::onRender()
     {
-        Context::getInstance().getRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
-        Overlay::onRender();
 
+        //Updating list of servers
         if (isUpdating && isFutureReady)
         {
             std::vector<ResponseFull> servers = quering.get();
-            auto &serverNodes = getWidget<2>().getChild().childs;
+            auto &serverNodes = getList().getChild().childs;
             serverNodes.clear();
             std::transform(servers.begin(), servers.end(), std::back_insert_iterator(serverNodes), [this](auto val)
                            { return ServerNode{this, val}; });
-            getWidget<2>().getChild().update();
+            getList().getChild().update();
             isUpdating = false;
         }
-
-        if (getWidget<2>().getChild().childs.size() == 0)
-            NoServerBox.onRender();
-
-        if (isUpdating)
-        {
-            Context::getInstance().getRenderTarget()->FillRectangle(makeD2DRectF(RectF{{0.1, 0.1}, {0.9, 0.9}}.scaled(getPosition())), halfOpacity);
-        }
+        //Using updated info render
+        getTint().setEnabled(isUpdating);
+        getNoServerText().setEnabled(getList().getChild().childs.size() == 0);
+        Overlay::onRender();
+    }
+    void ServerList::onErrorConnection()
+    {
+        getPopup().widget = Builder::makePopUpNotification(L"Не удалось \n подключится", getPosition(), L"Ок" ,[this](auto _){getPopup().widget = {};});
     }
 }

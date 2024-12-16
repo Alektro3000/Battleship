@@ -2,16 +2,6 @@
 #include "BattleShip.h"
 #ifndef PlayerH
 #define PlayerH
-//getHashGrid / HashGridResponse
-
-//loop
-//  MakeMove
-//  getMove/ReturnResult
-//  if -> ShowDestroyed
-
-//showAll
-
-
 struct Player
 {
     virtual ~Player() = default;

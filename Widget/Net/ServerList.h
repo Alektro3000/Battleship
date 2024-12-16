@@ -1,6 +1,5 @@
 #include "MakeServer.h"
 #include "ServerNode.h"
-#include "../Base/List.h"
 #include <future>
 #include <atomic>
 
@@ -11,23 +10,26 @@ namespace widget
 {
     class ServerList final: public Overlay<Button<Padder<TextBox>>,
                                       Button<Padder<TextBox>>,
-                                      Padder<List<ServerNode>>>
+                                      Padder<ListFinal<ServerNode>>,
+                                      Switch<TextBox>,
+                                      Switch<Padder<Empty>>,
+                                      WidgetPtr>
     {
     private:
         std::future<std::vector<ResponseFull>> quering;
         bool isUpdating = false;
         std::atomic<bool> isFutureReady = false;
-        SolidBrush brush{D2D1::ColorF(0)};
-        SolidBrush halfOpacity{D2D1::ColorF(D2D1::ColorF::LightGray, 0.5f)};
-        TextBox NoServerBox = {L"Нет серверов"};
-
+        auto& getList(){return getWidget<2>();}
+        auto& getNoServerText(){return getWidget<3>();}
+        auto& getTint(){return getWidget<4>();}
+        auto& getPopup(){return getWidget<5>();}
     public:
         ServerList();
         ServerList(const ServerList&) = delete;
         ServerList& operator=(const ServerList&) = delete;
-        void onResize(RectF newSize) override;
         void onRender() override;
         void updateServers();
+        void onErrorConnection();
     };
 }
 #endif

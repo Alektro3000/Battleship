@@ -13,7 +13,7 @@ namespace widget
     class BattleWidget final : public Overlay<PlayerGrid, OpponentGrid, WidgetPtr>
     {
         std::atomic<bool> isPlayerTurn;
-        std::atomic<bool> isValid = true;
+        std::atomic<bool> isConnected = true;
         bool isOpponentDetached = false;
         std::atomic<bool> isWon = false;
         std::atomic<bool> isLost = false;
@@ -22,19 +22,16 @@ namespace widget
 
         GameRules rules;
 
-        PlayerGrid &getPlayerGrid()
-        {
-            return getWidget<0>();
-        }
-        OpponentGrid &getOpponentGrid()
-        {
-            return getWidget<1>();
-        }
+        PlayerGrid &getPlayerGrid(){return getWidget<0>();}
+        OpponentGrid &getOpponentGrid(){return getWidget<1>();}
+        
         std::vector<unsigned int> shipHits;
         SolidBrush grayBrush{D2D1::ColorF(D2D1::ColorF::LightGray)};
         SolidBrush redBrush{D2D1::ColorF(D2D1::ColorF::Red)};
 
         PointF gridSize;
+
+
         void makeMove(PointI point, std::stop_token token);
 
         std::unique_ptr<Player> opponent;

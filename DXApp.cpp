@@ -37,6 +37,7 @@ void DXApp::renderFrame()
     if(size == PointF{0})
         return;
     Context::getInstance().getRenderTarget()->BeginDraw();
+    Context::getInstance().getRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
     currentWidget->onRender();
 #ifdef LiveCheck

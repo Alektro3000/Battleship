@@ -24,6 +24,7 @@ namespace widget
         void updateTextColor(D2D1::ColorF newColor = D2D1::ColorF(0, 1));
         void updateText(std::wstring newText);
         std::wstring getText();
+        void setText(std::wstring val){string = val;};
         D2D1::ColorF getTextColor();
         void onChar(WCHAR letter) override;
     };

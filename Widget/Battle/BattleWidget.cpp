@@ -17,11 +17,9 @@ namespace widget
         {
             makingMove = std::jthread([this, hash](std::stop_token token)
                                       { try {
-                                    if(!token.stop_requested())
-                                        opponent->getHashGrid();
-                                    if(!token.stop_requested())
-                                        opponent->returnHashGrid(hash);
-                                    getMove(token);} catch(...) {isValid = false;} });
+                                    opponent->getHashGrid();
+                                    opponent->returnHashGrid(hash);
+                                    getMove(token);} catch(...) {isConnected = false;} });
         }
         else
         {
@@ -30,13 +28,13 @@ namespace widget
                                     if(!token.stop_requested())
                                         opponent->returnHashGrid(hash);
                                     if(!token.stop_requested())
-                                        opponent->getHashGrid();} catch(...) {isValid = false;} });
+                                        opponent->getHashGrid();} catch(...) {isConnected = false;} });
         }
     };
 
     void BattleWidget::onClickDown(MouseButton button)
     {
-        if (isValid && isPlayerTurn && getOpponentGrid().getGridPos().isPointInsideExcl(Context::getInstance().getCursor()))
+        if (isConnected && isPlayerTurn && getOpponentGrid().getGridPos().isPointInsideExcl(Context::getInstance().getCursor()))
         {
             isPlayerTurn = false;
             auto p = getOpponentGrid().getPointCoords(Context::getInstance().getCursor());
@@ -48,7 +46,7 @@ namespace widget
             }
             catch(...)
             {
-                isValid = false;
+                isConnected = false;
             } });
         }
     };
@@ -125,7 +123,6 @@ namespace widget
 
     void BattleWidget::onRender()
     {
-        Context::getInstance().getRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
         for (int i = 0; i < getPosition().size().x / gridSize.x; i++)
             Context::getInstance().getRenderTarget()->DrawLine(D2D1::Point2F(getPosition().low.x + i * gridSize.x, getPosition().low.y),
@@ -144,7 +141,7 @@ namespace widget
             getWidget<2>().widget = Builder::makePopUpNotification(L"Вы проиграли", size);
         if (isWon)
             getWidget<2>().widget = Builder::makePopUpNotification(L"Вы выиграли", size);
-        if (!isValid)
+        if (!isConnected)
         {
             opponent->onDetach();
             getWidget<2>().widget = Builder::makePopUpNotification(L"Оппонент разорвал соединение", size);

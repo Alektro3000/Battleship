@@ -92,14 +92,30 @@ namespace widget
         std::wstring name;
         GameRules rules;
     };
+    
+    
+    constexpr static RectF TextDesc = {{0.05, 0.3}, {0.4, 0.38}};
+    constexpr static RectF Text = {{0.05, 0.4}, {0.4, 0.48}};
+    constexpr static RectF RulesSelectPos = {{0.05, 0.5}, {0.7, 0.9}};
+    constexpr static RectF ButtonPos = {{0.7, 0.88}, {0.98, 0.99}};
 
+    MakeServer::MakeServer() : Overlay(
+        {ButtonPos, Builder::makeText(L"Создать сервер").addButton([this](auto _) { makeServer(); }).build()},
+        {RulesSelectPos, RulesSelect{}},
+        {TextDesc, Builder::makeText(L"Название сервера:").build()},
+        {Text, Builder::makeText(L"").setEditableText().addPadding().setBorder().build()}) {};
+    
     void MakeServer::makeServer()
     {
         if (isServerEnabled)
             return;
+        auto str = getWidget<3>().getChild().getText();
+        if(str.size() == 0)
+            return;
         isServerEnabled = true;
-        auto str = text.getChild().getText();
-
+        getWidget<2>().setText(L"Имя сервера:");
+        
+        rules = getWidget<1>().getRules();
         server = std::async(std::launch::async, [str, this]() -> SocketContext
                             {
                 auto context = std::make_unique<boost::asio::io_context>();
@@ -114,24 +130,9 @@ namespace widget
                 return std::pair(std::move(holder).getSocket(), std::move(context));  });
     }
     
-    void MakeServer::onResize(RectF newSize)
-    {
-        Overlay::onResize(newSize);
-        if (!isServerEnabled)
-            text.onResize(TextBegin.scaled(newSize));
-    }
-    void MakeServer::onChar(WCHAR letter)
-    {
-        if (!isServerEnabled)
-            text.onChar(letter);
-    }
-
     void MakeServer::onRender()
     {
-        Context::getInstance().getRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
         Overlay::onRender();
-        if (!isServerEnabled)
-            text.onRender();
 
         if (isFutureReady)
         {
@@ -140,5 +141,20 @@ namespace widget
                                                         std::make_unique<NetPlayer>(rules, std::move(ip.second), std::move(*ip.first), true), rules.isFirstAttacking()),
                          false);
         }
+    }
+    void MakeServer::onChar(wchar_t key)
+    {
+        if(!isServerEnabled)
+            Overlay::onChar(key);
+    }
+    void MakeServer::onClickDown(MouseButton mouse)
+    {
+        if(!isServerEnabled)
+            Overlay::onClickDown(mouse);
+    }
+    void MakeServer::onClickUp(MouseButton mouse)
+    {
+        if(!isServerEnabled)
+            Overlay::onClickUp(mouse);
     }
 }

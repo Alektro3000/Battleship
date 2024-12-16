@@ -3,7 +3,7 @@
 
 namespace rg = std::ranges;
 
-PointI PCPlayer::getMove()
+PointI PcPlayer::getMove()
 {
     if (target == PointI{-1})
     {
@@ -27,7 +27,7 @@ PointI PCPlayer::getMove()
 
 
 
-void PCPlayer::buildShipLocations()
+void PcPlayer::buildShipLocations()
 {
     int x = 0;
     int y = 0;
@@ -70,12 +70,12 @@ void PCPlayer::buildShipLocations()
     ships.emplace_back(pos, 1);
 }
 
-std::vector<BattleShip> PCPlayer::showAllShips()
+std::vector<BattleShip> PcPlayer::showAllShips()
 {
     return ships;
 }
 
-AttResult PCPlayer::makeMove(PointI x)
+AttResult PcPlayer::makeMove(PointI x)
 {
     auto damagedShip = rg::find_if(ships,
                                     [x](BattleShip y)
@@ -87,11 +87,11 @@ AttResult PCPlayer::makeMove(PointI x)
     return AttResult(*damagedShip,shipHits[i]);
 }
 
-size_t PCPlayer::getHashGrid()
+size_t PcPlayer::getHashGrid()
 {
     return BattleShip::getHash(std::vector(ships));
 }
-auto PCPlayer::findClear(PointI point)
+auto PcPlayer::findClear(PointI point)
 {
     return [this, point](const PointI& val){
                 return rules.isValidIndex(point + val) &&
@@ -99,7 +99,7 @@ auto PCPlayer::findClear(PointI point)
             } ;
 }
 
-void PCPlayer::returnResult(AttResult res)
+void PcPlayer::returnResult(AttResult res)
 {
     playerHits[rules.flatIndex(target)] = res.val;
 

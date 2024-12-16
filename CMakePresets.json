@@ -25,6 +25,12 @@
         {
             "name": "conan-release",
             "configurePreset": "conan-default",
+            "configuration": "Release",
+            "jobs": 16
+        },
+        {
+            "name": "conan-debug",
+            "configurePreset": "conan-default",
             "configuration": "Debug",
             "jobs": 16
         }

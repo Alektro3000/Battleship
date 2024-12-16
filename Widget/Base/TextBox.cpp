@@ -7,16 +7,16 @@ namespace widget
     void TextBox::onResize(RectF newSize)
     {
         Widget::onResize(newSize);
-        if (size == -1)
+        if (size == -1 && newSize.size().sgn() == PointI{1})
         {
             format = TextFormat(0.125f);
             auto metric = format.getTextMetrix(string, newSize.size());
             // Limit from width
             auto maxWidth = format.textFormat->GetFontSize() *
-                            (newSize.size().x * 0.99f) / metric.width / static_cast<float>(metric.lineCount);
+                            (newSize.size().x * 0.99f) / metric.width;
             // Limit from height
             auto maxHeight = format.textFormat->GetFontSize() *
-                             (newSize.size().y * 0.99f) / metric.height / static_cast<float>(metric.lineCount);
+                             (newSize.size().y * 0.99f) / metric.height;
             format = TextFormat(std::min(maxWidth, maxHeight));
         }
     }

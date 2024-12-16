@@ -82,7 +82,6 @@ namespace widget
 
     void SelectWidget::onRender()
     {
-        Context::getInstance().getRenderTarget()->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
         for (int i = 0; i < getPosition().size().x / gridSize.x; i++)
             Context::getInstance().getRenderTarget()->DrawLine(D2D1::Point2F(getPosition().low.x + i * gridSize.x, getPosition().low.y),

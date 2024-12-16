@@ -11,7 +11,6 @@ namespace widget
     {
     public:
         Menu();
-        void onRender() override;
     };
 };
 

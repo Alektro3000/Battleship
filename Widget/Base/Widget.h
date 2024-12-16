@@ -22,7 +22,7 @@ namespace widget
         virtual void onRender() {};
         virtual void onClickDown(MouseButton button) {};
         virtual void onClickUp(MouseButton button) {};
-        virtual void onChar(WCHAR letter) {}; 
+        virtual void onChar(wchar_t letter) {}; 
         virtual RectF getPosition() const {return {0.f,0.f};};
         virtual ~IWidget() {};
         
@@ -61,7 +61,7 @@ namespace widget
         Widget& operator =(Widget&& other) = default;
     
     private:
-        RectF position;
+        RectF position = {0,0};
 
     public:
         RectF getPosition() const override final

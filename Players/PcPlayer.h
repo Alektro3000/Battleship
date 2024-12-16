@@ -4,7 +4,10 @@
 #include <random>
 #include <optional>
 
-struct PCPlayer final : Player
+#ifndef PcPlayerH
+#define PcPlayerH
+
+struct PcPlayer final : Player
 {
 private:
     GameRules rules;
@@ -19,7 +22,7 @@ private:
     void buildShipLocations();
     auto findClear(PointI point);
 public:
-    PCPlayer(GameRules rules) : playerHits(rules.getSize().x * rules.getSize().y), rules(rules)
+    PcPlayer(GameRules rules) : playerHits(rules.getSize().x * rules.getSize().y), rules(rules)
     {
         buildShipLocations();
     }
@@ -31,3 +34,4 @@ public:
     void returnHashGrid(std::size_t val) override {};
     void onEnd(std::vector<BattleShip>) override {};
 };
+#endif
