@@ -151,13 +151,13 @@ namespace widget
     }
 
     // finds servers
-    std::vector<ResponseFull> queryServers(boost::asio::io_context &io_context)
+    std::vector<ResponseFull> queryServers()
     {
         auto devices = queryDevices();
         // Asynchronously send messages for all subnets
         std::vector<std::future<std::vector<ResponseFull>>> tasks;
         for (auto ip : devices)
-            tasks.push_back(std::async([ip, &io_context]()
+            tasks.push_back(std::async([ip]()
                                        { return queryServers(ip); }));
 
         // Gather info in one
@@ -203,11 +203,8 @@ namespace widget
             isFutureReady = false;
             quering = std::async(std::launch::async, [this]()
                                  {
-                                    boost::asio::io_context io_context;
-                                    contextPointer = &io_context;
-                                    auto a = queryServers(io_context); 
+                                    auto a = queryServers(); 
                                     isFutureReady = true;
-                                    contextPointer = nullptr; 
                                     return a; });
         }
     }
@@ -239,10 +236,5 @@ namespace widget
         {
             Context::getInstance().getRenderTarget()->FillRectangle(makeD2DRectF(RectF{{0.1, 0.1}, {0.9, 0.9}}.scaled(getPosition())), halfOpacity);
         }
-    }
-    ServerList::~ServerList()
-    {
-        if (contextPointer)
-            (contextPointer.load())->stop();
     }
 }

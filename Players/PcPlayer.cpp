@@ -35,34 +35,39 @@ void PCPlayer::buildShipLocations()
         for (int j = 0; j < rules.getShipAmount(i); j++)
         {
             BattleShip a = {PointI(x, y), i};
+            
+            shipHits.emplace_back(0);
+            if(i == 1 && j == rules.getShipAmount(i)-1)
+                break;
+            ships.emplace_back(a);
             x += i + 1;
             if (x + i > rules.getSize().x)
             {
                 y += 2;
                 x = 0;
             }
-            ships.emplace_back(a);
-            shipHits.emplace_back(0);
         }
-    auto last = ships.back();
-    if (last.getLength() != 1)
+
+    if (rules.getShipAmount(1) == 0)
         return;
-    ships.pop_back();
+    
 
     int restX = (rules.getSize().x - x);
     int restY = (rules.getSize().y - y - 2) * rules.getSize().x;
     int possible = restX * 2 + restY;
 
     int rand = std::abs(int(mt())) % possible;
+    PointI pos;
     if (rand < restX * 2)
     {
-        ships.emplace_back(PointI(x + rand % restX, y + rand / restX), 1);
+        pos = PointI(x + rand % restX, y + rand / restX);
     }
     else
     {
         rand -= restX * 2;
-        ships.emplace_back(PointI(rand % rules.getSize().x, y + rand / rules.getSize().x), 1);
+        pos = PointI(rand % rules.getSize().x, y + 2 + rand / rules.getSize().x);
     }
+    ships.emplace_back(pos, 1);
 }
 
 std::vector<BattleShip> PCPlayer::showAllShips()

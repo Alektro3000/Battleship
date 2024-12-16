@@ -72,6 +72,6 @@ namespace widget
     };
     void ServerNode::onErrorConnection()
     {
-        parent->
+        
     }
 }
