@@ -7,25 +7,30 @@ namespace widget
     BattleWidget::BattleWidget(GameRules nRules,
                                std::unique_ptr<Player> nOpponent,
                                PlayerGrid &&PlayerGrid,
-                               bool isPlayerTurn) : Overlay(std::move(PlayerGrid), OpponentGrid{nRules.getSize(),nRules.getTotalShipAmount()}), isPlayerTurn(isPlayerTurn),
+                               bool isPlayerTurn) : Overlay(std::move(PlayerGrid), OpponentGrid{nRules.getSize(), nRules.getTotalShipAmount()}, {}),
+                                                    isPlayerTurn(isPlayerTurn),
                                                     opponent(std::move(nOpponent)), rules(std::move(nRules)),
                                                     shipHits(nRules.getTotalShipAmount())
     {
         auto hash = BattleShip::getHash(std::vector<BattleShip>(getPlayerGrid().begin(), getPlayerGrid().end()));
         if (!isPlayerTurn)
         {
-            makingMove = std::jthread([this, hash]()
+            makingMove = std::jthread([this, hash](std::stop_token token)
                                       { try {
-                                    opponent->getHashGrid();
-                                    opponent->returnHashGrid(hash);
-                                    getMove();} catch(...) {isValid = false;} });
+                                    if(!token.stop_requested())
+                                        opponent->getHashGrid();
+                                    if(!token.stop_requested())
+                                        opponent->returnHashGrid(hash);
+                                    getMove(token);} catch(...) {isValid = false;} });
         }
         else
         {
-            makingMove = std::jthread([this, hash]()
+            makingMove = std::jthread([this, hash](std::stop_token token)
                                       { try {
-                                    opponent->returnHashGrid(hash);
-                                    opponent->getHashGrid();} catch(...) {isValid = false;} });
+                                    if(!token.stop_requested())
+                                        opponent->returnHashGrid(hash);
+                                    if(!token.stop_requested())
+                                        opponent->getHashGrid();} catch(...) {isValid = false;} });
         }
     };
 
@@ -35,11 +40,11 @@ namespace widget
         {
             isPlayerTurn = false;
             auto p = getOpponentGrid().getPointCoords(Context::getInstance().getCursor());
-            makingMove = std::jthread([this, p]()
+            makingMove = std::jthread([this, p](std::stop_token token)
                                       {
             try
             {
-                makeMove(p);
+                makeMove(p, token);
             }
             catch(...)
             {
@@ -48,13 +53,15 @@ namespace widget
         }
     };
     // Player Move
-    void BattleWidget::makeMove(PointI p)
+    void BattleWidget::makeMove(PointI p, std::stop_token token)
     {
         auto res = opponent->makeMove(p);
+        if (token.stop_requested())
+            return;
         getOpponentGrid().getResult(p) = res.val;
         if (res.val == Results::Miss)
         {
-            getMove();
+            getMove(token);
             return;
         }
 
@@ -71,9 +78,12 @@ namespace widget
         opponent->onEnd(std::vector<BattleShip>(getPlayerGrid().begin(), getPlayerGrid().end()));
     }
     // Opponent move
-    void BattleWidget::getMove()
+    void BattleWidget::getMove(std::stop_token token)
     {
         PointI shot = opponent->getMove();
+        if (token.stop_requested())
+            return;
+
         auto damagedShip = std::find_if(getPlayerGrid().begin(), getPlayerGrid().end(),
                                         [shot](BattleShip y)
                                         { return y.IntersectionPosition(shot) != -1; });
@@ -88,6 +98,9 @@ namespace widget
 
         getPlayerGrid().getResult(shot) = result.val;
         opponent->returnResult(result);
+        if (token.stop_requested())
+            return;
+
         if (result.val == Results::Miss)
         {
             isPlayerTurn = true;
@@ -96,12 +109,15 @@ namespace widget
 
         if (++totalOpHits != rules.getTotalHitAmount())
         {
-            getMove();
+            getMove(token);
             return;
         }
 
         isLost = true;
         auto ships = opponent->showAllShips();
+        if (token.stop_requested())
+            return;
+
         std::for_each(ships.begin(), ships.end(),
                       [this](auto val)
                       { getOpponentGrid().addShip(val); });
@@ -120,31 +136,27 @@ namespace widget
                                                                D2D1::Point2F(getPosition().high.x, getPosition().low.y + i * gridSize.y), grayBrush);
 
         Overlay::onRender();
+        if (getWidget<2>().widget)
+            return;
+
+        auto size = getPosition();
+        if (isLost)
+            getWidget<2>().widget = Builder::makePopUpNotification(L"Вы проиграли", size);
+        if (isWon)
+            getWidget<2>().widget = Builder::makePopUpNotification(L"Вы выиграли", size);
+        if (!isValid)
+        {
+            opponent->onDetach();
+            getWidget<2>().widget = Builder::makePopUpNotification(L"Оппонент разорвал соединение", size);
+        }
+
         Context::getInstance().getRenderTarget()->DrawRectangle(
             makeD2DRectF((isPlayerTurn ? getOpponentGrid().getGridPos() : getPlayerGrid().getGridPos())), redBrush, 2);
-
-        if (!textBox)
-        {
-            auto size = RectF{{0.3, 0.4}, {0.7, 0.6}}.scaled(getPosition());
-            if (isLost)
-                textBox = Builder::makePopUpNotification(L"Вы проиграли", size);
-            if (isWon)
-                textBox = Builder::makePopUpNotification(L"Вы выиграли", size);
-            if (!isValid)
-            {
-                opponent->onDetach();
-                textBox = Builder::makePopUpNotification(L"Оппонент разорвал соединение", size);
-            }
-        }
-        else
-            textBox->onRender();
     }
 
     void BattleWidget::onResize(RectF newSize)
     {
         Widget::onResize(newSize);
-        if (textBox)
-            textBox->onResize(RectF{{0.3, 0.4}, {0.7, 0.6}}.scaled(newSize));
 
         gridSize = getPosition().size().x / 30;
         auto grid1Offset = gridSize * PointI{2, 1};
@@ -153,5 +165,7 @@ namespace widget
         auto grid2Offset = gridSize * PointI{2, 1};
         grid2Offset.x = getPosition().size().x - grid2Offset.x - gridSize.x * (1 + rules.getSize().x);
         getOpponentGrid().onResize({grid2Offset, grid2Offset + gridSize * (rules.getSize() + 1)});
+
+        getWidget<2>().onResize(newSize);
     }
 }

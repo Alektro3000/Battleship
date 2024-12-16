@@ -1,6 +1,6 @@
 #include "Menu.h"
 #include "Battle/SelectWidget.h"
-#include "Net/ListServer.h"
+#include "Net/ServerList.h"
 #include "../Players/PcPlayer.h"
 #include "Base/Builder.h"
 

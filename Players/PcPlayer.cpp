@@ -1,10 +1,13 @@
 #include "PcPlayer.h"
+#include <ranges>
+
+namespace rg = std::ranges;
 
 PointI PCPlayer::getMove()
 {
     if (target == PointI{-1})
     {
-        int clearCount = std::count(playerHits.begin(), playerHits.end(), Results::Clear);
+        int clearCount = rg::count(playerHits, Results::Clear);
         int rand = std::abs(int(mt()));
         int n = rand % clearCount;
         auto iter = playerHits.begin();
@@ -18,9 +21,12 @@ PointI PCPlayer::getMove()
         target = PointI{dist / 10, dist % 10};
     }
     counter++;
-    //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     return target;
 }
+
+
+
 void PCPlayer::buildShipLocations()
 {
     int x = 0;
@@ -66,7 +72,7 @@ std::vector<BattleShip> PCPlayer::showAllShips()
 
 AttResult PCPlayer::makeMove(PointI x)
 {
-    auto damagedShip = std::find_if(ships.begin(), ships.end(),
+    auto damagedShip = rg::find_if(ships,
                                     [x](BattleShip y)
                                     { return y.IntersectionPosition(x) != -1; });
     if (damagedShip == ships.end())
@@ -80,13 +86,20 @@ size_t PCPlayer::getHashGrid()
 {
     return BattleShip::getHash(std::vector(ships));
 }
+auto PCPlayer::findClear(PointI point)
+{
+    return [this, point](const PointI& val){
+                return rules.isValidIndex(point + val) &&
+                    playerHits[rules.flatIndex(point + val)] == Results::Clear;
+            } ;
+}
 
 void PCPlayer::returnResult(AttResult res)
 {
     playerHits[rules.flatIndex(target)] = res.val;
 
     std::array adj{PointI{1, 0}, PointI{0, 1}, PointI{-1, 0}, PointI{0, -1}};
-    std::shuffle(adj.begin(),adj.end(), mt);
+    rg::shuffle(adj,mt);
 
     std::array corner{PointI{1, 1}, PointI{-1, 1}, PointI{-1, -1}, PointI{1, -1}};
     if (res.val == Results::Hit)
@@ -107,13 +120,9 @@ void PCPlayer::returnResult(AttResult res)
         else
         {
             prevHit = target;
-            for (auto q : adj)
-                if (rules.isValidIndex(target + q) &&
-                    playerHits[rules.flatIndex(target + q)] == Results::Clear)
-                {
-                    target = target + q;
-                    break;
-                }
+            auto foundValidMovement = rg::find_if(adj, findClear(target) );
+            if(foundValidMovement != adj.end())
+                target = target + *foundValidMovement;
         }
         return;
     }
@@ -127,15 +136,15 @@ void PCPlayer::returnResult(AttResult res)
 
         if (prevHit != PointI{-1})
         {
-            for (auto q : adj)
-                if (rules.isValidIndex(prevHit + q) &&
-                    playerHits[rules.flatIndex(prevHit + q)] == Results::Clear)
-                    target = prevHit + q;
+            auto foundValidMovement = rg::find_if(adj,findClear(prevHit));
+            if(foundValidMovement != adj.end())
+                target = prevHit + *foundValidMovement;
             return;
         }
     }
     if (res.val == Results::Destroy)
     {
+        
         for (auto q : adj)
             if (rules.isValidIndex(prevHit + q) &&
                 playerHits[rules.flatIndex(prevHit + q)] == Results::Clear)

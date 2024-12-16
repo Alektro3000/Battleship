@@ -17,7 +17,6 @@ DXApp::DXApp(HWND hWnd)
 }
 void DXApp::onWinResize(UINT32 width, UINT32 height)
 {
-
     if(width == 0 && height == 0)
     {
         size = PointF(0);

@@ -99,13 +99,16 @@ namespace widget
             return;
         isServerEnabled = true;
         auto str = text.getChild().getText();
-        server = std::async(std::launch::async, [str, this]() -> std::pair<tcp::socket, std::unique_ptr<boost::asio::io_context> >
+
+        server = std::async(std::launch::async, [str, this]() -> SocketContext
                             {
                 auto context = std::make_unique<boost::asio::io_context>();
                 contextPointer = &(*context);
                 ServerHolder holder = ServerHolder(*context, str, rules);
                 boost::system::error_code err;
                 context->run(err);
+                if(contextPointer == nullptr)
+                    return {std::optional<tcp::socket>{},nullptr};
                 contextPointer = nullptr;
                 isFutureReady = true;
                 return std::pair(std::move(holder).getSocket(), std::move(context));  });
@@ -134,7 +137,7 @@ namespace widget
         {
             auto ip = server.get();
             pushWidget(std::make_unique<SelectWidget>(rules,
-                                                        std::make_unique<NetPlayer>(rules, std::move(ip.first), std::move(ip.second),true), rules.isFirstAttacking()),
+                                                        std::make_unique<NetPlayer>(rules, std::move(ip.second), std::move(*ip.first), true), rules.isFirstAttacking()),
                          false);
         }
     }

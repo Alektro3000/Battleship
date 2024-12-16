@@ -1,7 +1,0 @@
-{
-    "dependencies": [
-      "catch2",
-      "boost",
-      "directxtk"
-    ]
-}

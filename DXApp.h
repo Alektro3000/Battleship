@@ -1,4 +1,4 @@
-#include "Widget/Widget.h"
+#include "Widget/Base/Widget.h"
 #include <vector>
 #include <set>
 #include <algorithm>
@@ -9,7 +9,7 @@
 #ifndef DXAppH
 #define DXAppH
 
-class DXApp
+class DXApp final
 {
 
 public:

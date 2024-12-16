@@ -1,4 +1,4 @@
-#include "ListServer.h"
+#include "ServerList.h"
 
 namespace widget
 {
@@ -226,8 +226,8 @@ namespace widget
             std::vector<ResponseFull> servers = quering.get();
             auto &serverNodes = getWidget<2>().getChild().childs;
             serverNodes.clear();
-            std::transform(servers.begin(), servers.end(), std::back_insert_iterator(serverNodes), [](auto val)
-                           { return ServerNode(val); });
+            std::transform(servers.begin(), servers.end(), std::back_insert_iterator(serverNodes), [this](auto val)
+                           { return ServerNode{this, val}; });
             getWidget<2>().getChild().update();
             isUpdating = false;
         }

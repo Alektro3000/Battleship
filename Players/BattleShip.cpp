@@ -21,7 +21,7 @@ int BattleShip::IntersectionPosition(PointI point) const noexcept
 RectI BattleShip::getRect() const noexcept
 {
     PointI low = getPoint();
-    auto P = (PointI{getLength() - 1, 0}).rotated(getRotation());
+    auto P = (PointI{getLength() - 1, 0}).rotated(-getRotation());
     return Rect{low, low + P}.normalized();
 }
 

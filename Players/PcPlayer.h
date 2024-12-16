@@ -17,6 +17,7 @@ private:
     PointI prevHit{-1};
     bool isWalking = false;
     void buildShipLocations();
+    auto findClear(PointI point);
 public:
     PCPlayer(GameRules rules) : playerHits(rules.getSize().x * rules.getSize().y), rules(rules)
     {

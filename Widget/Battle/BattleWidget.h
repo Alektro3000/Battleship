@@ -2,16 +2,15 @@
 #include "Grids/OpponentGrid.h"
 #include "../Base/TextBox.h"
 #include "../Base/Overlay.h"
+#include "../Base/WidgetPtr.h"
 #include <thread>
-
-#include "../Widget.h"
 
 #ifndef BattleAppH
 #define BattleAppH
 
 namespace widget
 {
-    class BattleWidget final : public Overlay<PlayerGrid, OpponentGrid>
+    class BattleWidget final : public Overlay<PlayerGrid, OpponentGrid, WidgetPtr>
     {
         std::atomic<bool> isPlayerTurn;
         std::atomic<bool> isValid = true;
@@ -20,12 +19,8 @@ namespace widget
         std::atomic<bool> isLost = false;
         int totalHits = 0;
         int totalOpHits = 0;
-        std::jthread makingMove;
 
         GameRules rules;
-        std::unique_ptr<Player> opponent;
-
-        std::unique_ptr<IWidget> textBox = nullptr;
 
         PlayerGrid &getPlayerGrid()
         {
@@ -40,7 +35,10 @@ namespace widget
         SolidBrush redBrush{D2D1::ColorF(D2D1::ColorF::Red)};
 
         PointF gridSize;
-        void makeMove(PointI point);
+        void makeMove(PointI point, std::stop_token token);
+
+        std::unique_ptr<Player> opponent;
+        std::jthread makingMove;
 
     public:
         BattleWidget(GameRules nRules,
@@ -48,10 +46,14 @@ namespace widget
                      PlayerGrid &&gridPlayer,
                      bool isPlayerTurn = true);
 
-        void getMove();
+        void getMove(std::stop_token token);
         void onClickDown(MouseButton button) override;
         void onResize(RectF newSize) override;
         void onRender() override;
+        ~BattleWidget()
+        {
+            opponent->onDetach();
+        }
     };
 }
 #endif

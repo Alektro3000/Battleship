@@ -1,7 +1,4 @@
-#define UNICODE
-#define NOMINMAX 1
-#define WIN32_LEAN_AND_MEAN
-#define _WIN32_WINNT 0x0602
+#include "../WinMacros.h"
 #include <dwrite.h>
 #include <d2d1.h>
 #include <utility>
@@ -40,7 +37,7 @@ struct Context
     HWND hWnd = nullptr;
 
     boost::unordered_flat_map<std::wstring, ID2D1Bitmap *> loaded;
-    ID2D1Bitmap *loadBitmapFromFile(const wchar_t *path);
+    ID2D1Bitmap *loadBitmapFromFile(const WCHAR *path);
 
     ID2D1HwndRenderTarget *getRenderTarget()
     {
@@ -62,7 +59,7 @@ struct Context
         ScreenToClient(hWnd, &p);
         return (makePointF(p))*makePointF(RenderTarget->GetSize()) / makePointF(RenderTarget->GetPixelSize());
     }
-    ID2D1Bitmap *getBitmapFromFile(const wchar_t *path);
+    ID2D1Bitmap *getBitmapFromFile(const WCHAR *path);
     ~Context()
     {
         clear();
@@ -114,10 +111,10 @@ struct TextFormat
             textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         }
     }
-    DWRITE_TEXT_METRICS getTextMetrix(const std::wstring &string, PointF size)
+    DWRITE_TEXT_METRICS getTextMetrix(const std::wstring_view &string, PointF size)
     {
         IDWriteTextLayout *layout;
-        auto hr = Context::getInstance().getWriteFactory()->CreateTextLayout(string.c_str(), string.size(), textFormat, size.x, size.y, &layout);
+        auto hr = Context::getInstance().getWriteFactory()->CreateTextLayout(string.data(), string.size(), textFormat, size.x, size.y, &layout);
         DWRITE_TEXT_METRICS lam;
         if(!hr)
         {

@@ -183,6 +183,14 @@ namespace widget
 
         auto rect = grabbedShipGrid->getShipRect(grabbedShip) + grabbedShipGrid->getGridPos().low;
 
+#if 0
+        Context::getInstance().getRenderTarget()->DrawEllipse(
+           D2D1::Ellipse(makeD2DPointF(beginPoint),10,10), SolidBrush(D2D1::ColorF(0,1)) 
+        );
+        Context::getInstance().getRenderTarget()->DrawEllipse(
+           D2D1::Ellipse(makeD2DPointF(point+grabOffset),10,10), SolidBrush(D2D1::ColorF(0,1)) 
+        );
+#endif
         grabbedShipGrid->drawShip(grabbedShip, rect + point - beginPoint);
     }
 
@@ -191,12 +199,10 @@ namespace widget
         if (!isDown)
             return;
         isMovedAway = true;
-        grabbedShip.setRotation(grabbedShip.getRotation() + Rotation::Up);
+        grabbedShip.setRotation(grabbedShip.getRotation() + Rotation::Down);
 
         auto rot = grabOffset.rotated(Rotation::Up, -grabbedShipGrid->getGridSize() * 0.5f);
         beginPoint = beginPoint - (rot - grabOffset);
         grabOffset = rot;
-
-        // beginPoint = (beginPoint - grabOffset).rotated(Rotation::Up) + grabOffset;
     }
 }

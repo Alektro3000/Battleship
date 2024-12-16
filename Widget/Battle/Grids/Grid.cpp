@@ -12,7 +12,7 @@ namespace widget
             return;
         auto bitmap = Context::getInstance().getBitmapFromFile(ships[ship.getLength() - 1]);
         auto render = Context::getInstance().getRenderTarget();
-        render->SetTransform(D2D1::Matrix3x2F::Rotation(-90 * ship.getRotation(),
+        render->SetTransform(D2D1::Matrix3x2F::Rotation(90 * ship.getRotation(),
                                                         makeD2DPointF((position.center()))));
         render->DrawBitmap(bitmap, makeD2DRectF(position.rotated(ship.getRotation())));
         render->SetTransform(D2D1::Matrix3x2F::Identity());

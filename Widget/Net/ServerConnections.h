@@ -1,6 +1,4 @@
-//#define BOOST_ASIO_ENABLE_HANDLER_TRACKING
-#define UNICODE
-#define _WIN32_WINNT 0x0602
+#include "../WinMacros.h"
 #include <boost/asio.hpp>
 #include <iostream>
 #include <winsock2.h>
@@ -22,7 +20,7 @@ namespace widget
 
   struct Response
   {
-    std::array<wchar_t, 32> name;
+    std::array<WCHAR, 32> name;
     std::size_t len;
     std::wstring getString()
     {

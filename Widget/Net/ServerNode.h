@@ -8,13 +8,13 @@
 
 namespace widget
 {
-    class ServerNode : public Stack<Padder<Overlay<Padder<TextBox>, Padder<TextBox> > > >
+    class ServerNode final: public Stack<Padder<OverlayFinal<Padder<TextBox>, Padder<TextBox> > > >
     {
     private:
         ResponseFull info;
-
+        class ServerList* parent;
     public:
-        ServerNode(ResponseFull info);
+        ServerNode(class ServerList* parent, ResponseFull info);
         void onErrorConnection();
         void onClickDown(MouseButton button) override;
     };

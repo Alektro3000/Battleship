@@ -4,10 +4,10 @@
 using boost::asio::buffer;
 using boost::asio::write;
 
-NetPlayer::NetPlayer(GameRules rules, boost::asio::ip::tcp::socket &&socket,
-                     contextPtr &&context, bool server) : socket(std::move(socket)), 
-                     context(std::move(context)),
-                     rules(rules) {
+NetPlayer::NetPlayer(GameRules rules,contextPtr &&context, boost::asio::ip::tcp::socket &&socket,
+                      bool server) : socket(std::move(socket)),
+                                                          context(std::move(context)),
+                                                          rules(rules) {
 
                                                           };
 AttResult NetPlayer::makeMove(PointI x)
@@ -20,7 +20,7 @@ AttResult NetPlayer::makeMove(PointI x)
 std::vector<BattleShip> NetPlayer::showAllShips()
 {
     std::vector<BattleShip> ships(rules.getTotalShipAmount());
-    read(socket, buffer(ships.data(), ships.size() * sizeof(BattleShip)),boost::asio::transfer_all());
+    read(socket, buffer(ships.data(), ships.size() * sizeof(BattleShip)), boost::asio::transfer_all());
     return ships;
 };
 void NetPlayer::onEnd(std::vector<BattleShip> ships)
@@ -46,4 +46,9 @@ PointI NetPlayer::getMove()
 void NetPlayer::returnResult(AttResult res)
 {
     write(socket, buffer(&res, sizeof(AttResult)));
+};
+void NetPlayer::onDetach()
+{
+    socket.cancel();
+    context->stop();
 };

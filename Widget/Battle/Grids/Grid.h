@@ -1,6 +1,5 @@
 #include "../../../Players/Player.h"
-#include "../../Widget.h"
-#include "../../Base.h"
+#include "../../Base/Widget.h"
 #include <optional>
 
 #ifndef GridH

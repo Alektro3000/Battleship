@@ -5,7 +5,7 @@
 
 namespace widget
 {
-    class Menu : public Overlay<Button<Padder<TextBox>>,
+    class Menu final: public Overlay<Button<Padder<TextBox>>,
                                             Button<Padder<TextBox>>,
                                             Button<Padder<TextBox>>>
     {

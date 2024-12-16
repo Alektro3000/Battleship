@@ -1,4 +1,4 @@
-#include "../Widget.h"
+#include "Widget.h"
 #include <tuple>
 #include <utility>
 
@@ -12,37 +12,37 @@ namespace widget
     template <TWidget... Args>
     class Stack: public IWidget
     {
-    public:
+    protected:
+        Stack(Stack&& other) = default;
+        Stack& operator =(Stack&& other) = default;
         std::tuple<Args...> widgets;
-
-        Stack(Stack &&other) = default;
-        Stack &operator=(Stack &&other) = default;
+    public:
         Stack(Args &&...args) : widgets(std::move(args)...)
         {
         }
         void onResize(RectF newSize) override
         {
-            helper([newSize](auto &scr)
+            forEach([newSize](auto &scr)
                    { scr.onResize(newSize); });
         };
         void onRender() override
         {
-            helper([](auto &scr)
+            forEach([](auto &scr)
                    { scr.onRender(); });
         };
         void onClickDown(MouseButton button) override
         {
-            helper([button](auto &scr)
+            forEach([button](auto &scr)
                    { scr.onClickDown(button); });
         };
         void onClickUp(MouseButton button) override
         {
-            helper([button](auto &scr)
+            forEach([button](auto &scr)
                    { scr.onClickUp(button); });
         };
         void onChar(WCHAR letter) override
         {
-            helper([letter](auto &scr)
+            forEach([letter](auto &scr)
                    { scr.onChar(letter); });
         };
         auto& getChild() requires (sizeof...(Args) == 1)
@@ -59,12 +59,12 @@ namespace widget
         };
     private:
         template <std::size_t I = 0, typename F>
-        void helper(const F &function)
+        void forEach(const F &function)
         {
             if constexpr (I < sizeof...(Args))
             {
                 function(std::get<I>(widgets));
-                helper<I + 1>(function);
+                forEach<I + 1>(function);
             }
         };
     };

@@ -1,5 +1,4 @@
 #include "ServerConnections.h"
-#include "../Widget.h"
 #include "../Base/Builder.h"
 #include "../../Players/NetPlayer.h"
 #ifndef WidgetSelectMakeServerH
@@ -13,21 +12,23 @@ namespace widget
     return Builder::makeText(L"1").setEditableText().addButton([](auto _) {}).build();
   }
 
-  class MakeServer : public Overlay<Button<TextBox>>
+  class MakeServer final: public Overlay<Button<TextBox>>
   {
     decltype(editableText()) text = editableText();
     constexpr static RectF TextBegin = {{0.05, 0.4}, {0.4, 0.48}};
     constexpr static RectF ButtonPos = {{0.7, 0.88}, {0.98, 0.99}};
-    std::future<std::pair<tcp::socket, std::unique_ptr<boost::asio::io_context> > > server;
+    using SocketContext = std::pair<std::optional<tcp::socket>, std::unique_ptr<boost::asio::io_context> >; 
     GameRules rules;
     std::atomic<bool> isFutureReady = false;
-    std::atomic<boost::asio::io_context*> contextPointer = nullptr; //Needed for faster shutting down
+    //Needed for faster shutting down
+    std::atomic<boost::asio::io_context*> contextPointer = nullptr; 
     bool isServerEnabled = false;
+    //Must be destroyed first 
+    std::future<SocketContext > server;
 
   public:
-    MakeServer() : Overlay({ButtonPos,
-                                    Button{TextBox(L"Создать сервер"), [this](auto _)
-                                                 { makeServer(); }}}) {};
+    MakeServer() : Overlay({ButtonPos, Builder::makeText(L"Создать сервер").addButton([this](auto _)
+                                                 { makeServer(); }).build()}) {};
     MakeServer(const MakeServer&) = delete;
     MakeServer& operator=(const MakeServer&) = delete;
     void onChar(WCHAR letter) override;
@@ -36,8 +37,11 @@ namespace widget
     void makeServer();
     ~MakeServer()
     {
+      
       if(contextPointer)
         (contextPointer.load())->stop();
+      contextPointer = nullptr;
+        
     }
   };
 }

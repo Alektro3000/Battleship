@@ -81,6 +81,10 @@ TEST_CASE( "intersections", "[battleship]" ) {
 TEST_CASE( "rects", "[battleship]" ) {
     BattleShip ship = BattleShip{{0,0},5,Rotation::Right};
     CHECK( (ship.getRect() == RectI{{0,0},{4,0}}));
+
+    BattleShip shipUp = BattleShip{{0,0},5,Rotation::Up};
+    CHECK( (shipUp.getRect() == RectI{{0,0},{0,4}}));
+
     BattleShip ship1 = BattleShip{{0,0},5,Rotation::Left};
     BattleShip ship2 = BattleShip{{1,0},5,Rotation::Right};
     auto rect = ship1.getRect() ;

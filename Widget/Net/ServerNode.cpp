@@ -1,4 +1,5 @@
 #include "ServerNode.h"
+#include "ServerList.h"
 #include "../Battle/SelectWidget.h"
 #include "../../Players/NetPlayer.h"
 
@@ -10,7 +11,7 @@ namespace widget
         return {a.begin(),a.end()};
     }
 
-    ServerNode::ServerNode(ResponseFull info) : info(info),
+    ServerNode::ServerNode(ServerList* server, ResponseFull info) : parent(server), info(info),
                                                 Stack(
                                                     Builder::makeOverlay<Padder<TextBox>, Padder<TextBox>>(
                                                         {RectF{{0, 0}, {0.4, 1}}, Builder::makeText(infoToW(info))
@@ -66,11 +67,11 @@ namespace widget
         }
         
         pushWidget(std::make_unique<SelectWidget>(rules,
-                     std::make_unique<NetPlayer>(rules, std::move(socket), std::move(context), false),!rules.isFirstAttacking()),
+                     std::make_unique<NetPlayer>(rules, std::move(context), std::move(socket), false),!rules.isFirstAttacking()),
                      false);
     };
     void ServerNode::onErrorConnection()
     {
-
+        parent->
     }
 }

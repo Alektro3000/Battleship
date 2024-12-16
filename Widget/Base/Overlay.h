@@ -1,4 +1,4 @@
-#include "../Widget.h"
+#include "Widget.h"
 #include <tuple>
 #include <utility>
 
@@ -10,11 +10,17 @@ namespace widget
     template <TWidget... Args>
     class Overlay : public Widget
     {
+    protected:
         std::tuple<Args...> widgets;
         std::array<RectF, sizeof...(Args)> positions;
+        template <std::size_t I = 0>
+        auto& getWidget(){
+            return std::get<I>(widgets);
+        }
+        Overlay(Overlay&& other) = default;
+        Overlay& operator =(Overlay&& other) = default;
     public:
-        Overlay(Overlay &&other) = default;
-        Overlay &operator=(Overlay &&other) = default;
+
         Overlay(std::pair<RectF, Args &&>... args) : widgets(std::move(args.second)...), positions((args.first)...)
         {
         }
@@ -24,49 +30,51 @@ namespace widget
         void onResize(RectF newSize) override
         {
             Widget::onResize(newSize);
-            helper([newSize](RectF rect, auto &scr)
+            forEach([newSize](RectF rect, auto &scr)
                    { scr.onResize(rect.scaled(newSize)); });
         };
         void onRender() override
         {
             Widget::onRender();
-            helper([](RectF rect, auto &scr)
+            forEach([](RectF rect, auto &scr)
                    { scr.onRender(); });
         };
         void onClickDown(MouseButton button) override
         {
             Widget::onClickDown(button);
-            helper([button](RectF rect, auto &scr)
+            forEach([button](RectF rect, auto &scr)
                    { scr.tryClickDown(button); });
         };
         void onClickUp(MouseButton button) override
         {
             Widget::onClickUp(button);
-            helper([button](RectF rect, auto &scr)
+            forEach([button](RectF rect, auto &scr)
                    { scr.tryClickUp(button); });
         };
         void onChar(WCHAR letter) override
         {
             Widget::onChar(letter);
-            helper([letter](RectF rect, auto &scr)
+            forEach([letter](RectF rect, auto &scr)
                    { scr.onChar(letter); });
         }
 
-        template <std::size_t I = 0>
-        auto& getWidget()
-        {
-            return std::get<I>(widgets);
-        }
     private:
         template <std::size_t I = 0, typename F>
-        void helper(const F &function)
+        void forEach(const F &function)
         {
             if constexpr (I < sizeof...(Args))
             {
                 function((positions)[I], std::get<I>(widgets));
-                helper<I + 1>(function);
+                forEach<I + 1>(function);
             }
         }
+    };
+    template <TWidget... Args>
+    class OverlayFinal final : public Overlay<Args...>
+    {
+    public:
+        using Overlay<Args...>::Overlay;
+        using Overlay<Args...>::operator=;
     };
 }
 #endif

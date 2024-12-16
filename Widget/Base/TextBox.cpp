@@ -40,13 +40,8 @@ namespace widget
         else
         {
             string.push_back(letter);
-            auto pos = getPosition().size();
-            IDWriteTextLayout *layout;
-            Context::getInstance().getWriteFactory()->CreateTextLayout(string.c_str(), string.size(), format, pos.x, pos.y, &layout);
-            DWRITE_TEXT_METRICS lam;
-            layout->GetMetrics(&lam);
-            layout->Release();
-            if (lam.height > pos.y)
+            DWRITE_TEXT_METRICS lam = format.getTextMetrix(string, getPosition().size());
+            if (lam.height > getPosition().size().y)
                 string.pop_back();
         }
     }

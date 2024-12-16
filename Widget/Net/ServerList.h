@@ -1,4 +1,3 @@
-#define UNICODE
 #include "MakeServer.h"
 #include "ServerNode.h"
 #include "../Base/List.h"
@@ -10,7 +9,7 @@
 
 namespace widget
 {
-    class ServerList : public Overlay<Button<Padder<TextBox>>,
+    class ServerList final: public Overlay<Button<Padder<TextBox>>,
                                       Button<Padder<TextBox>>,
                                       Padder<List<ServerNode>>>
     {

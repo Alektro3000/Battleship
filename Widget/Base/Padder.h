@@ -9,6 +9,7 @@ namespace widget {
     template<TWidget Child>
     class Padder final : public Stack<Child>
     {
+        RectF position;
         RectF padding;
         SolidBrush borderColor;
         SolidBrush backColor;
@@ -22,6 +23,7 @@ namespace widget {
         void onResize(RectF newSize) override
         {
             Stack<Child>::onResize(newSize+RectF{padding.low,-padding.high});
+            position = newSize;
         }
         void setBorder(D2D1::ColorF color, int width = 1, int radius = 10)
         {
@@ -43,7 +45,7 @@ namespace widget {
         }
         RectF getPosition() const override
         {
-            return Stack<Child>::getChild().getPosition() - RectF{padding.low,-padding.high};
+            return position;
         }
     };
 }

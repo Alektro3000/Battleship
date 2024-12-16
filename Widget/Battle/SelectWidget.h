@@ -3,7 +3,6 @@
 #include "Grids/OpponentGrid.h"
 #include "../Base/Builder.h"
 
-#include "../Widget.h"
 
 #ifndef SelectWidgetH
 #define SelectWidgetH

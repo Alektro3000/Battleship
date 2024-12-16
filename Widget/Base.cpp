@@ -1,6 +1,6 @@
 #include "Base.h"
 
-ID2D1Bitmap *Context::getBitmapFromFile(const wchar_t *uri)
+ID2D1Bitmap *Context::getBitmapFromFile(const WCHAR *uri)
 {
     if (loaded.contains(uri))
         return loaded.at(uri);
@@ -9,7 +9,7 @@ ID2D1Bitmap *Context::getBitmapFromFile(const wchar_t *uri)
     return bitmap;
 }
 
-ID2D1Bitmap *Context::loadBitmapFromFile(const wchar_t *uri)
+ID2D1Bitmap *Context::loadBitmapFromFile(const WCHAR *uri)
 {
     IWICBitmapDecoder *pDecoder = nullptr;
     IWICBitmapFrameDecode *pSource = nullptr;
@@ -29,7 +29,7 @@ ID2D1Bitmap *Context::loadBitmapFromFile(const wchar_t *uri)
     ID2D1Bitmap *bitmap = nullptr;
     if (SUCCEEDED(hr))
         hr = RenderTarget->CreateBitmapFromWicBitmap(Converter, nullptr, &bitmap);
-
+    
     // Release resources
     if (pDecoder)
         pDecoder->Release();
